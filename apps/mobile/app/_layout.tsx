@@ -93,6 +93,13 @@ export default function RootLayout() {
             presentation: 'modal',
           }}
         />
+        <Stack.Screen
+          name="export"
+          options={{
+            title: 'Export & Import',
+            presentation: 'modal',
+          }}
+        />
       </Stack>
     </>
   );

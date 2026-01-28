@@ -10,6 +10,7 @@ import {
   Linking,
 } from 'react-native';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAnalysisStore } from '@/store/analysis';
 import { useReportsStore } from '@/store/reports';
@@ -36,6 +37,7 @@ interface SettingSection {
 }
 
 export default function SettingsScreen() {
+  const router = useRouter();
   const { clearAllData, hasGenomeData, databaseStatus } = useAnalysisStore();
   const { reports, clearAllReports } = useReportsStore();
   const { clearAllSessions } = useChatStore();
@@ -116,11 +118,7 @@ export default function SettingsScreen() {
   };
 
   const handleExportData = () => {
-    Alert.alert(
-      'Export Data',
-      'Your data will be exported as an encrypted file that you can backup.',
-      [{ text: 'OK' }]
-    );
+    router.push('/export');
   };
 
   const biometricAvailable = capabilities?.isAvailable && capabilities?.isEnrolled;
