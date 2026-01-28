@@ -15,7 +15,17 @@ export {
   type MetabolizerResult,
   type DrugLookupResult
 } from './pharmgkb/loader';
-export { GWASLoader, type GWASLoaderOptions, type GWASLoadProgress } from './gwas/loader';
+export {
+  GWASLoader,
+  GWAS_URLS,
+  type GWASConfig,
+  type GWASLoaderOptions,
+  type GWASLoadProgress,
+  type GWASQueryOptions,
+  type GWASStats,
+  type GWASVersionInfo,
+  type TraitSummary
+} from './gwas/loader';
 export { GenomeForgeDB, db } from './db';
 export type {
   DatabaseMetadata,
