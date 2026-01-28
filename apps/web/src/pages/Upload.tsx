@@ -24,8 +24,11 @@ export default function UploadPage() {
         setProgress({ stage: 'Detecting format...', percent: 10 });
 
         const result = await parseGenomeFile(file, {
-          onProgress: (stage, percent) => {
-            setProgress({ stage, percent: 10 + percent * 0.8 });
+          onProgress: (progress) => {
+            const percent = progress.totalLines
+              ? Math.round((progress.linesProcessed / progress.totalLines) * 100)
+              : 50;
+            setProgress({ stage: progress.phase, percent: 10 + percent * 0.8 });
           }
         });
 
