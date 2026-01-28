@@ -26,20 +26,27 @@
       "import": "./dist/analyzer/index.mjs",
       "require": "./dist/analyzer/index.js",
       "types": "./dist/analyzer/index.d.ts"
+    },
+    "./reporter": {
+      "import": "./dist/reporter/index.mjs",
+      "require": "./dist/reporter/index.js",
+      "types": "./dist/reporter/index.d.ts"
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts src/parser/index.ts src/matcher/index.ts src/analyzer/index.ts --format cjs,esm --dts",
-    "dev": "tsup src/index.ts src/parser/index.ts src/matcher/index.ts src/analyzer/index.ts --format cjs,esm --dts --watch",
+    "build": "tsup src/index.ts src/parser/index.ts src/matcher/index.ts src/analyzer/index.ts src/reporter/index.ts --format cjs,esm --dts",
+    "dev": "tsup src/index.ts src/parser/index.ts src/matcher/index.ts src/analyzer/index.ts src/reporter/index.ts --format cjs,esm --dts --watch",
     "test": "vitest",
     "test:coverage": "vitest --coverage",
     "type-check": "tsc --noEmit",
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@genomeforge/types": "workspace:*"
+    "@genomeforge/types": "workspace:*",
+    "uuid": "^11.0.0"
   },
   "devDependencies": {
+    "@types/uuid": "^10.0.0",
     "@vitest/coverage-v8": "^2.1.8",
     "tsup": "^8.3.5",
     "typescript": "^5.7.2",
