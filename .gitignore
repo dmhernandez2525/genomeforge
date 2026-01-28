@@ -1,0 +1,57 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Build outputs
+dist
+.next
+.turbo
+out
+build
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+.DS_Store
+
+# Testing
+coverage
+*.lcov
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Cache
+.cache
+*.tsbuildinfo
+
+# Database files (downloaded separately)
+databases/clinvar/*.json
+databases/pharmgkb/*.json
+databases/gwas/*.json
+!databases/README.md
+
+# Mobile
+apps/mobile/.expo
+apps/mobile/ios
+apps/mobile/android
+
+# Desktop
+apps/desktop-mac/build
+apps/desktop-windows/target
+apps/desktop-windows/src-tauri/target
+
+# Secrets (never commit)
+*.pem
+*.key
+credentials.json
+service-account.json

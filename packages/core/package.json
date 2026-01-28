@@ -1,0 +1,48 @@
+{
+  "name": "@genomeforge/core",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Core genome parsing and analysis engine",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./parser": {
+      "import": "./dist/parser/index.mjs",
+      "require": "./dist/parser/index.js",
+      "types": "./dist/parser/index.d.ts"
+    },
+    "./matcher": {
+      "import": "./dist/matcher/index.mjs",
+      "require": "./dist/matcher/index.js",
+      "types": "./dist/matcher/index.d.ts"
+    },
+    "./analyzer": {
+      "import": "./dist/analyzer/index.mjs",
+      "require": "./dist/analyzer/index.js",
+      "types": "./dist/analyzer/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsup src/index.ts src/parser/index.ts src/matcher/index.ts src/analyzer/index.ts --format cjs,esm --dts",
+    "dev": "tsup src/index.ts src/parser/index.ts src/matcher/index.ts src/analyzer/index.ts --format cjs,esm --dts --watch",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@genomeforge/types": "workspace:*"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^2.1.8",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

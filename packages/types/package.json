@@ -1,0 +1,46 @@
+{
+  "name": "@genomeforge/types",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Shared TypeScript type definitions for GenomeForge",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./genome": {
+      "import": "./dist/genome.mjs",
+      "require": "./dist/genome.js",
+      "types": "./dist/genome.d.ts"
+    },
+    "./analysis": {
+      "import": "./dist/analysis.mjs",
+      "require": "./dist/analysis.js",
+      "types": "./dist/analysis.d.ts"
+    },
+    "./reports": {
+      "import": "./dist/reports.mjs",
+      "require": "./dist/reports.js",
+      "types": "./dist/reports.d.ts"
+    },
+    "./ai": {
+      "import": "./dist/ai.mjs",
+      "require": "./dist/ai.js",
+      "types": "./dist/ai.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsup src/index.ts src/genome.ts src/analysis.ts src/reports.ts src/ai.ts --format cjs,esm --dts",
+    "dev": "tsup src/index.ts src/genome.ts src/analysis.ts src/reports.ts src/ai.ts --format cjs,esm --dts --watch",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2"
+  }
+}
