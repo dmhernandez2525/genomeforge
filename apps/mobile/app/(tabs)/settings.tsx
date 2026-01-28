@@ -9,9 +9,13 @@ import {
   Alert,
   Linking,
 } from 'react-native';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useAnalysisStore } from '@/store/analysis';
+import { useReportsStore } from '@/store/reports';
+import { useChatStore } from '@/store/chat';
+import { useAuthStore } from '@/store/auth';
+import { getBiometricTypeLabel } from '@/services/biometricAuth';
 
 interface SettingItem {
   id: string;
@@ -21,7 +25,9 @@ interface SettingItem {
   iconColor: string;
   type: 'switch' | 'link' | 'action';
   value?: boolean;
+  disabled?: boolean;
   onPress?: () => void;
+  onToggle?: (value: boolean) => void;
 }
 
 interface SettingSection {
@@ -31,15 +37,68 @@ interface SettingSection {
 
 export default function SettingsScreen() {
   const { clearAllData, hasGenomeData, databaseStatus } = useAnalysisStore();
+  const { reports, clearAllReports } = useReportsStore();
+  const { clearAllSessions } = useChatStore();
+  const {
+    biometricEnabled,
+    capabilities,
+    enableBiometric,
+    disableBiometric,
+    lock,
+    error,
+    clearError,
+  } = useAuthStore();
 
-  const [biometricEnabled, setBiometricEnabled] = useState(false);
+  const [biometricLabel, setBiometricLabel] = useState('Biometric');
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [analyticsEnabled, setAnalyticsEnabled] = useState(false);
+
+  useEffect(() => {
+    getBiometricTypeLabel().then(setBiometricLabel);
+  }, []);
+
+  useEffect(() => {
+    if (error) {
+      Alert.alert('Error', error, [{ text: 'OK', onPress: clearError }]);
+    }
+  }, [error, clearError]);
+
+  const handleToggleBiometric = async (enable: boolean) => {
+    if (enable) {
+      const success = await enableBiometric();
+      if (success) {
+        Alert.alert(
+          'Biometric Lock Enabled',
+          `${biometricLabel} will now be required to access the app.`
+        );
+      }
+    } else {
+      await disableBiometric();
+      Alert.alert(
+        'Biometric Lock Disabled',
+        'The app is no longer protected by biometric authentication.'
+      );
+    }
+  };
+
+  const handleLockNow = () => {
+    Alert.alert(
+      'Lock App',
+      `Lock the app now? You will need to use ${biometricLabel} to unlock.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Lock',
+          onPress: () => lock(),
+        },
+      ]
+    );
+  };
 
   const handleClearData = () => {
     Alert.alert(
       'Clear All Data',
-      'This will delete all your genetic data, analysis results, and settings. This action cannot be undone.',
+      'This will delete all your genetic data, analysis results, reports, chat history, and settings. This action cannot be undone.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -47,6 +106,8 @@ export default function SettingsScreen() {
           style: 'destructive',
           onPress: () => {
             clearAllData();
+            clearAllReports();
+            clearAllSessions();
             Alert.alert('Data Cleared', 'All data has been removed from the app.');
           },
         },
@@ -62,20 +123,38 @@ export default function SettingsScreen() {
     );
   };
 
+  const biometricAvailable = capabilities?.isAvailable && capabilities?.isEnrolled;
+
   const sections: SettingSection[] = [
     {
       title: 'Security',
       items: [
         {
           id: 'biometric',
-          title: 'Biometric Authentication',
-          description: 'Use Face ID or Touch ID to secure the app',
-          icon: 'finger-print',
+          title: `${biometricLabel} Lock`,
+          description: biometricAvailable
+            ? `Use ${biometricLabel} to secure the app`
+            : `${biometricLabel} is not available on this device`,
+          icon: biometricLabel === 'Face ID' ? 'scan' : 'finger-print',
           iconColor: '#2563eb',
           type: 'switch',
           value: biometricEnabled,
-          onPress: () => setBiometricEnabled(!biometricEnabled),
+          disabled: !biometricAvailable,
+          onToggle: handleToggleBiometric,
         },
+        ...(biometricEnabled
+          ? [
+              {
+                id: 'lock-now',
+                title: 'Lock Now',
+                description: 'Immediately lock the app',
+                icon: 'lock-closed' as const,
+                iconColor: '#dc2626',
+                type: 'action' as const,
+                onPress: handleLockNow,
+              },
+            ]
+          : []),
         {
           id: 'api-keys',
           title: 'API Keys',
@@ -84,7 +163,7 @@ export default function SettingsScreen() {
           iconColor: '#7c3aed',
           type: 'link',
           onPress: () => {
-            // Navigate to API keys screen
+            Alert.alert('API Keys', 'Go to the Chat screen to manage API keys in Settings.');
           },
         },
       ],
@@ -104,7 +183,7 @@ export default function SettingsScreen() {
         {
           id: 'databases',
           title: 'Reference Databases',
-          description: `${Object.values(databaseStatus).filter(s => s.loaded).length}/3 loaded`,
+          description: `${Object.values(databaseStatus).filter((s) => s.loaded).length}/3 loaded`,
           icon: 'server',
           iconColor: '#f97316',
           type: 'link',
@@ -134,7 +213,7 @@ export default function SettingsScreen() {
           iconColor: '#2563eb',
           type: 'switch',
           value: notificationsEnabled,
-          onPress: () => setNotificationsEnabled(!notificationsEnabled),
+          onToggle: setNotificationsEnabled,
         },
         {
           id: 'analytics',
@@ -144,7 +223,7 @@ export default function SettingsScreen() {
           iconColor: '#6b7280',
           type: 'switch',
           value: analyticsEnabled,
-          onPress: () => setAnalyticsEnabled(!analyticsEnabled),
+          onToggle: setAnalyticsEnabled,
         },
       ],
     },
@@ -203,15 +282,44 @@ export default function SettingsScreen() {
             <Text style={styles.storageLabel}>DNA Files</Text>
           </View>
           <View style={styles.storageStat}>
+            <Text style={styles.storageValue}>{reports.length}</Text>
+            <Text style={styles.storageLabel}>Reports</Text>
+          </View>
+          <View style={styles.storageStat}>
             <Text style={styles.storageValue}>
               {Object.values(databaseStatus).filter((s) => s.loaded).length}
             </Text>
             <Text style={styles.storageLabel}>Databases</Text>
           </View>
-          <View style={styles.storageStat}>
-            <Text style={styles.storageValue}>~50 MB</Text>
-            <Text style={styles.storageLabel}>Total</Text>
-          </View>
+        </View>
+      </View>
+
+      {/* Security Status */}
+      <View
+        style={[
+          styles.securityStatus,
+          biometricEnabled ? styles.securityStatusEnabled : styles.securityStatusDisabled,
+        ]}
+      >
+        <Ionicons
+          name={biometricEnabled ? 'shield-checkmark' : 'shield-outline'}
+          size={24}
+          color={biometricEnabled ? '#059669' : '#f59e0b'}
+        />
+        <View style={styles.securityStatusText}>
+          <Text
+            style={[
+              styles.securityStatusTitle,
+              biometricEnabled ? styles.securityStatusTitleEnabled : styles.securityStatusTitleDisabled,
+            ]}
+          >
+            {biometricEnabled ? 'App Protected' : 'App Not Protected'}
+          </Text>
+          <Text style={styles.securityStatusDescription}>
+            {biometricEnabled
+              ? `${biometricLabel} authentication is enabled`
+              : 'Enable biometric lock for extra security'}
+          </Text>
         </View>
       </View>
 
@@ -226,20 +334,30 @@ export default function SettingsScreen() {
                 style={[
                   styles.settingItem,
                   index === section.items.length - 1 && styles.settingItemLast,
+                  item.disabled && styles.settingItemDisabled,
                 ]}
-                onPress={item.onPress}
-                disabled={item.type === 'switch'}
+                onPress={item.type !== 'switch' ? item.onPress : undefined}
+                disabled={item.type === 'switch' || item.disabled}
               >
                 <View
                   style={[
                     styles.settingIcon,
                     { backgroundColor: item.iconColor + '20' },
+                    item.disabled && styles.settingIconDisabled,
                   ]}
                 >
-                  <Ionicons name={item.icon} size={20} color={item.iconColor} />
+                  <Ionicons
+                    name={item.icon}
+                    size={20}
+                    color={item.disabled ? '#9ca3af' : item.iconColor}
+                  />
                 </View>
                 <View style={styles.settingText}>
-                  <Text style={styles.settingTitle}>{item.title}</Text>
+                  <Text
+                    style={[styles.settingTitle, item.disabled && styles.settingTitleDisabled]}
+                  >
+                    {item.title}
+                  </Text>
                   {item.description && (
                     <Text style={styles.settingDescription}>{item.description}</Text>
                   )}
@@ -247,9 +365,10 @@ export default function SettingsScreen() {
                 {item.type === 'switch' ? (
                   <Switch
                     value={item.value}
-                    onValueChange={item.onPress}
+                    onValueChange={item.onToggle}
                     trackColor={{ false: '#d1d5db', true: '#93c5fd' }}
                     thumbColor={item.value ? '#2563eb' : '#f3f4f6'}
+                    disabled={item.disabled}
                   />
                 ) : (
                   <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
@@ -282,7 +401,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
-    marginBottom: 24,
+    marginBottom: 16,
     ...Platform.select({
       ios: {
         shadowColor: '#000',
@@ -323,6 +442,38 @@ const styles = StyleSheet.create({
     color: '#6b7280',
     marginTop: 4,
   },
+  securityStatus: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 24,
+  },
+  securityStatusEnabled: {
+    backgroundColor: '#ecfdf5',
+  },
+  securityStatusDisabled: {
+    backgroundColor: '#fffbeb',
+  },
+  securityStatusText: {
+    flex: 1,
+  },
+  securityStatusTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  securityStatusTitleEnabled: {
+    color: '#065f46',
+  },
+  securityStatusTitleDisabled: {
+    color: '#92400e',
+  },
+  securityStatusDescription: {
+    fontSize: 14,
+    color: '#6b7280',
+    marginTop: 2,
+  },
   section: {
     marginBottom: 24,
   },
@@ -362,12 +513,18 @@ const styles = StyleSheet.create({
   settingItemLast: {
     borderBottomWidth: 0,
   },
+  settingItemDisabled: {
+    opacity: 0.6,
+  },
   settingIcon: {
     width: 36,
     height: 36,
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  settingIconDisabled: {
+    backgroundColor: '#f3f4f6',
   },
   settingText: {
     flex: 1,
@@ -376,6 +533,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
     color: '#111827',
+  },
+  settingTitleDisabled: {
+    color: '#9ca3af',
   },
   settingDescription: {
     fontSize: 14,
