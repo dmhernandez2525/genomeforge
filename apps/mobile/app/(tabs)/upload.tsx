@@ -1,10 +1,9 @@
 import { View, Text, StyleSheet, TouchableOpacity, Platform, Alert, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
-import * as FileSystem from 'expo-file-system';
-import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useAnalysisStore } from '@/store/analysis';
+import { useGenomeProcessing } from '@/hooks/useGenomeProcessing';
 
 interface FileFormat {
   id: string;
@@ -40,10 +39,8 @@ const supportedFormats: FileFormat[] = [
 
 export default function UploadScreen() {
   const router = useRouter();
-  const { setGenomeData, hasGenomeData } = useAnalysisStore();
-  const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const { hasGenomeData, genomeData } = useAnalysisStore();
+  const { state, processFile, reset } = useGenomeProcessing();
 
   const handleFilePick = async () => {
     try {
@@ -57,49 +54,14 @@ export default function UploadScreen() {
       }
 
       const file = result.assets[0];
-      setSelectedFile(file.name);
-      setUploading(true);
-      setUploadProgress(0);
 
-      // Simulate progress for better UX
-      const progressInterval = setInterval(() => {
-        setUploadProgress((prev) => {
-          if (prev >= 90) {
-            clearInterval(progressInterval);
-            return prev;
-          }
-          return prev + 10;
-        });
-      }, 200);
+      // Process the file using our genome processing hook
+      const processingResult = await processFile(file.uri, file.name);
 
-      // Read file content
-      const content = await FileSystem.readAsStringAsync(file.uri, {
-        encoding: FileSystem.EncodingType.UTF8,
-      });
-
-      clearInterval(progressInterval);
-      setUploadProgress(100);
-
-      // Store genome data (basic validation)
-      if (content.length < 100) {
-        throw new Error('File appears to be empty or too small');
-      }
-
-      // Set genome data in store
-      setGenomeData({
-        source: detectFileFormat(file.name),
-        filename: file.name,
-        variantCount: estimateVariantCount(content),
-        uploadedAt: new Date().toISOString(),
-      });
-
-      // Small delay to show completion
-      setTimeout(() => {
-        setUploading(false);
-        setSelectedFile(null);
+      if (processingResult.analysis) {
         Alert.alert(
-          'Success',
-          'Your genetic data has been loaded successfully.',
+          'Processing Complete',
+          `Successfully analyzed ${processingResult.genome?.totalVariants.toLocaleString()} variants.\n\nFound ${processingResult.analysis.summary.actionableFindings} actionable findings.`,
           [
             {
               text: 'View Analysis',
@@ -108,60 +70,72 @@ export default function UploadScreen() {
             { text: 'OK' },
           ]
         );
-      }, 500);
+      }
     } catch (error) {
-      setUploading(false);
-      setSelectedFile(null);
       Alert.alert(
-        'Upload Failed',
+        'Processing Failed',
         error instanceof Error ? error.message : 'Failed to process file'
       );
     }
   };
 
-  const detectFileFormat = (filename: string): string => {
-    const lower = filename.toLowerCase();
-    if (lower.includes('23andme')) return '23andMe';
-    if (lower.includes('ancestry')) return 'AncestryDNA';
-    if (lower.endsWith('.vcf') || lower.endsWith('.vcf.gz')) return 'VCF';
-    return 'Unknown';
-  };
-
-  const estimateVariantCount = (content: string): number => {
-    // Simple estimation based on line count (excluding headers)
-    const lines = content.split('\n').filter((l) => l && !l.startsWith('#'));
-    return lines.length;
+  const handleRetry = () => {
+    reset();
+    handleFilePick();
   };
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       {/* Current Status */}
-      {hasGenomeData && (
+      {hasGenomeData && !state.isProcessing && (
         <View style={styles.statusCard}>
           <Ionicons name="checkmark-circle" size={24} color="#059669" />
           <View style={styles.statusText}>
             <Text style={styles.statusTitle}>DNA Data Loaded</Text>
             <Text style={styles.statusDescription}>
-              You can upload new data to replace the existing file.
+              {genomeData?.filename} ({genomeData?.variantCount?.toLocaleString()} variants)
             </Text>
           </View>
         </View>
       )}
 
+      {/* Error State */}
+      {state.error && (
+        <View style={styles.errorCard}>
+          <Ionicons name="alert-circle" size={24} color="#dc2626" />
+          <View style={styles.errorText}>
+            <Text style={styles.errorTitle}>Processing Failed</Text>
+            <Text style={styles.errorDescription}>{state.error}</Text>
+          </View>
+          <TouchableOpacity style={styles.retryButton} onPress={handleRetry}>
+            <Text style={styles.retryButtonText}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       {/* Upload Area */}
       <TouchableOpacity
-        style={[styles.uploadArea, uploading && styles.uploadAreaActive]}
+        style={[styles.uploadArea, state.isProcessing && styles.uploadAreaActive]}
         onPress={handleFilePick}
-        disabled={uploading}
+        disabled={state.isProcessing}
       >
-        {uploading ? (
-          <View style={styles.uploadingContent}>
-            <Ionicons name="cloud-upload" size={48} color="#2563eb" />
-            <Text style={styles.uploadingTitle}>Processing {selectedFile}</Text>
-            <View style={styles.progressBar}>
-              <View style={[styles.progressFill, { width: `${uploadProgress}%` }]} />
+        {state.isProcessing ? (
+          <View style={styles.processingContent}>
+            <View style={styles.processingIconContainer}>
+              <Ionicons
+                name={state.stage === 'parsing' ? 'document-text' : 'analytics'}
+                size={40}
+                color="#2563eb"
+              />
             </View>
-            <Text style={styles.progressText}>{uploadProgress}%</Text>
+            <Text style={styles.processingTitle}>
+              {state.stage === 'parsing' ? 'Parsing Genome' : 'Analyzing Variants'}
+            </Text>
+            <Text style={styles.processingMessage}>{state.message}</Text>
+            <View style={styles.progressBar}>
+              <View style={[styles.progressFill, { width: `${state.progress}%` }]} />
+            </View>
+            <Text style={styles.progressText}>{state.progress}%</Text>
           </View>
         ) : (
           <View style={styles.uploadContent}>
@@ -176,22 +150,59 @@ export default function UploadScreen() {
         )}
       </TouchableOpacity>
 
-      {/* Supported Formats */}
-      <Text style={styles.sectionTitle}>Supported Formats</Text>
-      <View style={styles.formatsGrid}>
-        {supportedFormats.map((format) => (
-          <View key={format.id} style={styles.formatCard}>
-            <Ionicons name={format.icon} size={24} color="#2563eb" />
-            <View style={styles.formatText}>
-              <Text style={styles.formatName}>{format.name}</Text>
-              <Text style={styles.formatDescription}>{format.description}</Text>
-              <Text style={styles.formatExtensions}>
-                {format.extensions.join(', ')}
-              </Text>
-            </View>
+      {/* Processing Stages */}
+      {state.isProcessing && (
+        <View style={styles.stagesContainer}>
+          <Text style={styles.stagesTitle}>Processing Stages</Text>
+          <View style={styles.stagesList}>
+            <StageItem
+              title="Parse File"
+              description="Reading and parsing variant data"
+              active={state.stage === 'parsing'}
+              complete={state.stage === 'analyzing' || state.stage === 'complete'}
+            />
+            <StageItem
+              title="Clinical Analysis"
+              description="Matching against ClinVar database"
+              active={state.stage === 'analyzing' && state.progress < 70}
+              complete={state.progress >= 70 || state.stage === 'complete'}
+            />
+            <StageItem
+              title="Pharmacogenomics"
+              description="Checking drug interactions"
+              active={state.stage === 'analyzing' && state.progress >= 70 && state.progress < 85}
+              complete={state.progress >= 85 || state.stage === 'complete'}
+            />
+            <StageItem
+              title="Traits"
+              description="Finding trait associations"
+              active={state.stage === 'analyzing' && state.progress >= 85}
+              complete={state.stage === 'complete'}
+            />
           </View>
-        ))}
-      </View>
+        </View>
+      )}
+
+      {/* Supported Formats */}
+      {!state.isProcessing && (
+        <>
+          <Text style={styles.sectionTitle}>Supported Formats</Text>
+          <View style={styles.formatsGrid}>
+            {supportedFormats.map((format) => (
+              <View key={format.id} style={styles.formatCard}>
+                <Ionicons name={format.icon} size={24} color="#2563eb" />
+                <View style={styles.formatText}>
+                  <Text style={styles.formatName}>{format.name}</Text>
+                  <Text style={styles.formatDescription}>{format.description}</Text>
+                  <Text style={styles.formatExtensions}>
+                    {format.extensions.join(', ')}
+                  </Text>
+                </View>
+              </View>
+            ))}
+          </View>
+        </>
+      )}
 
       {/* Privacy Notice */}
       <View style={styles.privacyNotice}>
@@ -202,6 +213,44 @@ export default function UploadScreen() {
         </Text>
       </View>
     </ScrollView>
+  );
+}
+
+function StageItem({
+  title,
+  description,
+  active,
+  complete,
+}: {
+  title: string;
+  description: string;
+  active: boolean;
+  complete: boolean;
+}) {
+  return (
+    <View style={[styles.stageItem, active && styles.stageItemActive]}>
+      <View
+        style={[
+          styles.stageIcon,
+          active && styles.stageIconActive,
+          complete && styles.stageIconComplete,
+        ]}
+      >
+        {complete ? (
+          <Ionicons name="checkmark" size={16} color="#fff" />
+        ) : active ? (
+          <View style={styles.stageIconDot} />
+        ) : (
+          <View style={styles.stageIconEmpty} />
+        )}
+      </View>
+      <View style={styles.stageText}>
+        <Text style={[styles.stageTitle, (active || complete) && styles.stageTitleActive]}>
+          {title}
+        </Text>
+        <Text style={styles.stageDescription}>{description}</Text>
+      </View>
+    </View>
   );
 }
 
@@ -235,6 +284,39 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#047857',
     marginTop: 2,
+  },
+  errorCard: {
+    backgroundColor: '#fef2f2',
+    borderRadius: 12,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 16,
+  },
+  errorText: {
+    flex: 1,
+  },
+  errorTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#991b1b',
+  },
+  errorDescription: {
+    fontSize: 14,
+    color: '#dc2626',
+    marginTop: 2,
+  },
+  retryButton: {
+    backgroundColor: '#dc2626',
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  retryButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 14,
   },
   uploadArea: {
     backgroundColor: '#fff',
@@ -284,21 +366,35 @@ const styles = StyleSheet.create({
     color: '#6b7280',
     textAlign: 'center',
   },
-  uploadingContent: {
+  processingContent: {
     alignItems: 'center',
     width: '100%',
   },
-  uploadingTitle: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#2563eb',
-    marginTop: 16,
+  processingIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#dbeafe',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 16,
+  },
+  processingTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1e40af',
+    marginBottom: 8,
+  },
+  processingMessage: {
+    fontSize: 14,
+    color: '#3b82f6',
+    marginBottom: 16,
+    textAlign: 'center',
   },
   progressBar: {
     width: '100%',
     height: 8,
-    backgroundColor: '#e5e7eb',
+    backgroundColor: '#dbeafe',
     borderRadius: 4,
     overflow: 'hidden',
   },
@@ -311,6 +407,84 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#6b7280',
     marginTop: 8,
+  },
+  stagesContainer: {
+    marginBottom: 24,
+  },
+  stagesTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#111827',
+    marginBottom: 12,
+  },
+  stagesList: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    overflow: 'hidden',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
+  },
+  stageItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f3f4f6',
+    gap: 12,
+  },
+  stageItemActive: {
+    backgroundColor: '#eff6ff',
+  },
+  stageIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#e5e7eb',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stageIconActive: {
+    backgroundColor: '#2563eb',
+  },
+  stageIconComplete: {
+    backgroundColor: '#059669',
+  },
+  stageIconDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#fff',
+  },
+  stageIconEmpty: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#9ca3af',
+  },
+  stageText: {
+    flex: 1,
+  },
+  stageTitle: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#6b7280',
+  },
+  stageTitleActive: {
+    color: '#111827',
+  },
+  stageDescription: {
+    fontSize: 12,
+    color: '#9ca3af',
+    marginTop: 2,
   },
   sectionTitle: {
     fontSize: 18,
