@@ -31,11 +31,16 @@
       "import": "./dist/reporter/index.mjs",
       "require": "./dist/reporter/index.js",
       "types": "./dist/reporter/index.d.ts"
+    },
+    "./ai": {
+      "import": "./dist/ai/index.mjs",
+      "require": "./dist/ai/index.js",
+      "types": "./dist/ai/index.d.ts"
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts src/parser/index.ts src/matcher/index.ts src/analyzer/index.ts src/reporter/index.ts --format cjs,esm --dts",
-    "dev": "tsup src/index.ts src/parser/index.ts src/matcher/index.ts src/analyzer/index.ts src/reporter/index.ts --format cjs,esm --dts --watch",
+    "build": "tsup src/index.ts src/parser/index.ts src/matcher/index.ts src/analyzer/index.ts src/reporter/index.ts src/ai/index.ts --format cjs,esm --dts",
+    "dev": "tsup src/index.ts src/parser/index.ts src/matcher/index.ts src/analyzer/index.ts src/reporter/index.ts src/ai/index.ts --format cjs,esm --dts --watch",
     "test": "vitest",
     "test:coverage": "vitest --coverage",
     "type-check": "tsc --noEmit",
