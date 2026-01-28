@@ -7,3 +7,4 @@
 export * from './genomeParser';
 export * from './genomeAnalysis';
 export * from './aiChat';
+export * from './reportGenerator';

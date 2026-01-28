@@ -5,21 +5,24 @@ import {
   ScrollView,
   TouchableOpacity,
   Platform,
+  Alert,
 } from 'react-native';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAnalysisStore } from '@/store/analysis';
+import { useReportsStore } from '@/store/reports';
+import { generateReport, type ReportType } from '@/services/reportGenerator';
 
-interface ReportType {
-  id: string;
+interface ReportTypeConfig {
+  id: ReportType;
   name: string;
   description: string;
   icon: React.ComponentProps<typeof Ionicons>['name'];
   color: string;
 }
 
-const reportTypes: ReportType[] = [
+const reportTypes: ReportTypeConfig[] = [
   {
     id: 'summary',
     name: 'Summary Report',
@@ -48,39 +51,96 @@ const reportTypes: ReportType[] = [
     icon: 'people',
     color: '#059669',
   },
+  {
+    id: 'traits',
+    name: 'Traits',
+    description: 'Genetic trait associations',
+    icon: 'color-palette',
+    color: '#ec4899',
+  },
 ];
-
-interface SavedReport {
-  id: string;
-  type: string;
-  name: string;
-  generatedAt: string;
-}
 
 export default function ReportsScreen() {
   const router = useRouter();
-  const { hasGenomeData, analysisResult } = useAnalysisStore();
-  const [generating, setGenerating] = useState<string | null>(null);
+  const { hasGenomeData, analysisResult, genomeData } = useAnalysisStore();
+  const { reports, addReport, deleteReport } = useReportsStore();
+  const [generating, setGenerating] = useState<ReportType | null>(null);
 
-  // Mock saved reports
-  const savedReports: SavedReport[] = [
-    { id: '1', type: 'summary', name: 'Summary Report', generatedAt: '2024-01-28' },
-    { id: '2', type: 'health', name: 'Health Risks Report', generatedAt: '2024-01-27' },
-  ];
-
-  const handleGenerateReport = async (reportType: ReportType) => {
-    if (!hasGenomeData) {
-      router.push('/upload');
+  const handleGenerateReport = async (reportType: ReportTypeConfig) => {
+    if (!hasGenomeData || !analysisResult) {
+      Alert.alert(
+        'No Analysis Data',
+        'Please upload and analyze your genetic data first.',
+        [{ text: 'Upload', onPress: () => router.push('/upload') }, { text: 'Cancel' }]
+      );
       return;
     }
 
     setGenerating(reportType.id);
 
-    // Simulate report generation
-    setTimeout(() => {
+    try {
+      // Simulate async generation with a small delay for UX
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      const report = generateReport(
+        reportType.id,
+        analysisResult,
+        genomeData?.filename || 'Unknown file'
+      );
+
+      addReport(report);
+
+      Alert.alert(
+        'Report Generated',
+        `Your ${reportType.name} has been created successfully.`,
+        [
+          {
+            text: 'View Report',
+            onPress: () => router.push(`/report/${report.id}`),
+          },
+          { text: 'OK' },
+        ]
+      );
+    } catch (error) {
+      Alert.alert('Error', 'Failed to generate report. Please try again.');
+    } finally {
       setGenerating(null);
-      // Navigate to report view
-    }, 2000);
+    }
+  };
+
+  const handleViewReport = (reportId: string) => {
+    router.push(`/report/${reportId}`);
+  };
+
+  const handleDeleteReport = (reportId: string, reportName: string) => {
+    Alert.alert(
+      'Delete Report',
+      `Are you sure you want to delete "${reportName}"?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => deleteReport(reportId),
+        },
+      ]
+    );
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  };
+
+  const getReportIcon = (type: ReportType): React.ComponentProps<typeof Ionicons>['name'] => {
+    return reportTypes.find((t) => t.id === type)?.icon || 'document-text';
+  };
+
+  const getReportColor = (type: ReportType): string => {
+    return reportTypes.find((t) => t.id === type)?.color || '#2563eb';
   };
 
   if (!hasGenomeData) {
@@ -117,7 +177,7 @@ export default function ReportsScreen() {
           >
             {generating === reportType.id ? (
               <View style={styles.generatingOverlay}>
-                <Ionicons name="refresh" size={24} color="#2563eb" />
+                <Ionicons name="sync" size={24} color="#2563eb" />
                 <Text style={styles.generatingText}>Generating...</Text>
               </View>
             ) : (
@@ -141,40 +201,79 @@ export default function ReportsScreen() {
       </View>
 
       {/* Saved Reports */}
-      {savedReports.length > 0 && (
+      {reports.length > 0 && (
         <>
-          <Text style={styles.sectionTitle}>Saved Reports</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Saved Reports</Text>
+            <Text style={styles.reportCount}>{reports.length} report(s)</Text>
+          </View>
           <View style={styles.savedReports}>
-            {savedReports.map((report) => (
-              <TouchableOpacity key={report.id} style={styles.savedReportCard}>
-                <View style={styles.savedReportIcon}>
+            {reports.map((report) => (
+              <TouchableOpacity
+                key={report.id}
+                style={styles.savedReportCard}
+                onPress={() => handleViewReport(report.id)}
+              >
+                <View
+                  style={[
+                    styles.savedReportIcon,
+                    { backgroundColor: getReportColor(report.type) + '20' },
+                  ]}
+                >
                   <Ionicons
-                    name={
-                      reportTypes.find((t) => t.id === report.type)?.icon ||
-                      'document-text'
-                    }
+                    name={getReportIcon(report.type)}
                     size={24}
-                    color="#2563eb"
+                    color={getReportColor(report.type)}
                   />
                 </View>
                 <View style={styles.savedReportText}>
-                  <Text style={styles.savedReportName}>{report.name}</Text>
+                  <Text style={styles.savedReportName}>{report.title}</Text>
                   <Text style={styles.savedReportDate}>
-                    Generated {report.generatedAt}
+                    Generated {formatDate(report.generatedAt)}
                   </Text>
+                  <View style={styles.savedReportMeta}>
+                    <View style={styles.metaBadge}>
+                      <Text style={styles.metaBadgeText}>
+                        {report.summary.totalFindings} findings
+                      </Text>
+                    </View>
+                    {report.summary.actionableItems > 0 && (
+                      <View style={[styles.metaBadge, styles.actionableBadge]}>
+                        <Text style={[styles.metaBadgeText, styles.actionableBadgeText]}>
+                          {report.summary.actionableItems} actionable
+                        </Text>
+                      </View>
+                    )}
+                  </View>
                 </View>
                 <View style={styles.savedReportActions}>
-                  <TouchableOpacity style={styles.iconButton}>
-                    <Ionicons name="share-outline" size={20} color="#6b7280" />
+                  <TouchableOpacity
+                    style={styles.iconButton}
+                    onPress={() => handleViewReport(report.id)}
+                  >
+                    <Ionicons name="eye-outline" size={20} color="#6b7280" />
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.iconButton}>
-                    <Ionicons name="download-outline" size={20} color="#6b7280" />
+                  <TouchableOpacity
+                    style={styles.iconButton}
+                    onPress={() => handleDeleteReport(report.id, report.title)}
+                  >
+                    <Ionicons name="trash-outline" size={20} color="#dc2626" />
                   </TouchableOpacity>
                 </View>
               </TouchableOpacity>
             ))}
           </View>
         </>
+      )}
+
+      {/* No Reports Yet */}
+      {reports.length === 0 && (
+        <View style={styles.noReportsCard}>
+          <Ionicons name="documents-outline" size={32} color="#9ca3af" />
+          <Text style={styles.noReportsText}>
+            No reports generated yet. Select a report type above to get started.
+          </Text>
+        </View>
       )}
 
       {/* Privacy Notice */}
@@ -240,11 +339,21 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#111827',
     marginBottom: 12,
+  },
+  reportCount: {
+    fontSize: 14,
+    color: '#6b7280',
   },
   reportTypesGrid: {
     flexDirection: 'row',
@@ -308,7 +417,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: 12,
     ...Platform.select({
       ios: {
@@ -326,7 +435,6 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 12,
-    backgroundColor: '#eff6ff',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -343,12 +451,47 @@ const styles = StyleSheet.create({
     color: '#6b7280',
     marginTop: 2,
   },
-  savedReportActions: {
+  savedReportMeta: {
     flexDirection: 'row',
     gap: 8,
+    marginTop: 8,
+  },
+  metaBadge: {
+    backgroundColor: '#f3f4f6',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  metaBadgeText: {
+    fontSize: 12,
+    color: '#6b7280',
+  },
+  actionableBadge: {
+    backgroundColor: '#fef2f2',
+  },
+  actionableBadgeText: {
+    color: '#dc2626',
+  },
+  savedReportActions: {
+    flexDirection: 'row',
+    gap: 4,
   },
   iconButton: {
     padding: 8,
+  },
+  noReportsCard: {
+    backgroundColor: '#f3f4f6',
+    borderRadius: 12,
+    padding: 24,
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  noReportsText: {
+    fontSize: 14,
+    color: '#6b7280',
+    textAlign: 'center',
+    marginTop: 12,
+    lineHeight: 20,
   },
   privacyCard: {
     backgroundColor: '#ecfdf5',
