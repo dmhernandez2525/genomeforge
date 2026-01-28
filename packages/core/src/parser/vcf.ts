@@ -7,8 +7,8 @@
  * @packageDocumentation
  */
 
-import type { SNP, Allele, Chromosome } from '@genomeforge/types';
-import { normalizeChromosome, VALID_ALLELES } from './utils';
+import type { SNP, Allele } from '@genomeforge/types';
+import { normalizeChromosome } from './utils';
 
 /**
  * VCF file header pattern
@@ -58,7 +58,7 @@ export function detectVCFVersion(header: string): VCFVersion | null {
 /**
  * Parse VCF INFO field
  */
-function parseInfoField(info: string): Record<string, string | boolean> {
+export function parseInfoField(info: string): Record<string, string | boolean> {
   const result: Record<string, string | boolean> = {};
 
   if (info === '.' || !info) {

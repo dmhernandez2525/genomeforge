@@ -161,7 +161,8 @@ function generateRiskExplanation(
 // ============================================================================
 
 // Common pharmacogenes and their metabolizer phenotypes
-const METABOLIZER_PHENOTYPES: Record<string, Record<string, string>> = {
+// Exported for use in phenotype determination when full star allele calling is implemented
+export const METABOLIZER_PHENOTYPES: Record<string, Record<string, string>> = {
   CYP2D6: {
     '*1/*1': 'Normal Metabolizer',
     '*1/*4': 'Intermediate Metabolizer',
@@ -288,4 +289,4 @@ export function analyzeGenome(matchResult: MatchResult): AnalysisResult {
   };
 }
 
-export type { RiskAssessment, MetabolizerPhenotype, CarrierStatus, AnalysisResult };
+// Types are already exported via interface definitions above

@@ -9,7 +9,7 @@
  * @packageDocumentation
  */
 
-import type { SNP, Allele, Chromosome } from '@genomeforge/types';
+import type { SNP, Allele } from '@genomeforge/types';
 import { normalizeChromosome, VALID_ALLELES } from './utils';
 
 /**

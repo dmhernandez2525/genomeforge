@@ -9,7 +9,6 @@
 
 import type {
   ParsedGenome,
-  SNP,
   AnnotatedSNP,
   MatchResult,
   MatchSummary,

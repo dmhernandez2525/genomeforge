@@ -1,11 +1,9 @@
 /**
- * MyHeritage raw data file parser
+ * FamilyTreeDNA raw data file parser
  *
- * MyHeritage uses a similar chip to AncestryDNA with ~700,000 SNPs.
- * Note: MyHeritage owns Promethease and SNPedia.
- *
+ * FamilyTreeDNA uses Illumina chips with ~700,000 SNPs.
  * File format: CSV with columns: RSID, CHROMOSOME, POSITION, RESULT
- * The RESULT column contains the diploid genotype (e.g., "AA", "AG")
+ * Note: Format is similar to 23andMe but uses CSV instead of TSV
  *
  * @packageDocumentation
  */
@@ -14,22 +12,22 @@ import type { SNP, Allele } from '@genomeforge/types';
 import { normalizeChromosome, VALID_ALLELES } from './utils';
 
 /**
- * MyHeritage header patterns (may have quotes around column names)
- * Note: MyHeritage typically uses quoted CSV format
+ * FamilyTreeDNA header patterns
+ * Note: FTDNA uses uppercase column names without quotes
  */
-const MYHERITAGE_HEADER_PATTERNS = [
-  /^"RSID","CHROMOSOME","POSITION","RESULT"\s*$/i
+const FTDNA_HEADER_PATTERNS = [
+  /^RSID,CHROMOSOME,POSITION,RESULT\s*$/i
 ];
 
 /**
- * Check if header matches MyHeritage format
+ * Check if header matches FamilyTreeDNA format
  */
-export function isMyHeritageFormat(header: string): boolean {
+export function isFTDNAFormat(header: string): boolean {
   const lines = header.split('\n');
 
   for (const line of lines) {
     const trimmed = line.trim();
-    for (const pattern of MYHERITAGE_HEADER_PATTERNS) {
+    for (const pattern of FTDNA_HEADER_PATTERNS) {
       if (pattern.test(trimmed)) {
         return true;
       }
@@ -51,12 +49,13 @@ function unquote(field: string): string {
 }
 
 /**
- * Parse a single MyHeritage format line
+ * Parse a single FamilyTreeDNA format line
  *
- * Format: "RSID","CHROMOSOME","POSITION","RESULT"
- * Example: "rs4477212","1","82154","AA"
+ * Format: RSID,CHROMOSOME,POSITION,RESULT
+ * Example: rs4477212,1,82154,AA
+ * or with quotes: "rs4477212","1","82154","AA"
  */
-export function parseMyHeritageLine(line: string): SNP | null {
+export function parseFTDNALine(line: string): SNP | null {
   // Skip comments and empty lines
   if (!line.trim() || line.startsWith('#')) {
     return null;
@@ -76,9 +75,9 @@ export function parseMyHeritageLine(line: string): SNP | null {
     return null;
   }
 
-  // Validate rsID format
+  // Validate rsID format (rs##### or i#####)
   const rsidTrimmed = rsid.trim();
-  if (!rsidTrimmed.match(/^rs\d+$/)) {
+  if (!rsidTrimmed.match(/^(rs|i)\d+$/)) {
     return null;
   }
 
@@ -98,7 +97,7 @@ export function parseMyHeritageLine(line: string): SNP | null {
   const normalizedGenotype = genotype.toUpperCase().trim();
 
   // Handle no-call genotypes
-  if (normalizedGenotype === '--' || normalizedGenotype === '' || normalizedGenotype === 'NC') {
+  if (normalizedGenotype === '--' || normalizedGenotype === '' || normalizedGenotype === 'NC' || normalizedGenotype === '00') {
     return {
       rsid: rsidTrimmed,
       chromosome,
@@ -133,13 +132,13 @@ export function parseMyHeritageLine(line: string): SNP | null {
 }
 
 /**
- * Parse MyHeritage raw data file content
+ * Parse FamilyTreeDNA raw data file content
  *
  * @param content - Raw file content
  * @param options - Parser options
  * @returns Array of parsed SNPs
  */
-export function parseMyHeritageFile(
+export function parseFTDNAFile(
   content: string,
   options: { skipInvalid?: boolean } = {}
 ): { snps: SNP[]; skipped: number } {
@@ -150,7 +149,7 @@ export function parseMyHeritageFile(
   let skipped = 0;
 
   for (const line of lines) {
-    const snp = parseMyHeritageLine(line);
+    const snp = parseFTDNALine(line);
 
     if (snp) {
       snps.push(snp);

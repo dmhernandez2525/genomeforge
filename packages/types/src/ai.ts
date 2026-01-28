@@ -129,26 +129,6 @@ export interface CarrierSummary {
 }
 
 // ============================================================================
-// Conversation Management
-// ============================================================================
-
-/**
- * Conversation state
- */
-export interface Conversation {
-  /** Conversation ID */
-  id: string;
-  /** Message history */
-  messages: Message[];
-  /** Genetic context */
-  context: GeneticContext;
-  /** Creation timestamp */
-  createdAt: Date;
-  /** Last message timestamp */
-  lastMessageAt: Date;
-}
-
-// ============================================================================
 // Key Management
 // ============================================================================
 

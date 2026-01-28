@@ -8,7 +8,7 @@
  * @packageDocumentation
  */
 
-import type { SNP, Allele, Chromosome } from '@genomeforge/types';
+import type { SNP, Allele } from '@genomeforge/types';
 import { normalizeChromosome, VALID_ALLELES } from './utils';
 
 /**
@@ -29,15 +29,33 @@ const VERSION_PATTERNS = {
  * Detect 23andMe file version from header
  */
 export function detect23andMeVersion(header: string): TwentyThreeAndMeVersion | null {
-  // v5 typically has additional metadata comments
-  if (header.includes('# 23andMe') && header.includes('build 37')) {
+  // v5 typically has more metadata comments and mentions build 37
+  if (header.includes('23andMe') && header.includes('build 37')) {
     return 'v5';
   }
 
-  for (const [version, pattern] of Object.entries(VERSION_PATTERNS)) {
+  // v5 files often have more header lines with detailed comments
+  const lines = header.split('\n');
+  const commentLines = lines.filter(l => l.startsWith('#'));
+
+  if (commentLines.length >= 10) {
+    return 'v5';
+  }
+
+  // Check for column header pattern
+  for (const [, pattern] of Object.entries(VERSION_PATTERNS)) {
     if (pattern.test(header)) {
-      return version as TwentyThreeAndMeVersion;
+      // Fewer comments suggest older version
+      if (commentLines.length > 5) {
+        return 'v4';
+      }
+      return 'v3';
     }
+  }
+
+  // Fallback: if it looks like 23andMe format (tab-separated with rsid)
+  if (header.includes('\t') && header.match(/rs\d+\t/)) {
+    return 'v5';
   }
 
   return null;
@@ -63,7 +81,7 @@ export function parse23andMeLine(line: string): SNP | null {
     return null;
   }
 
-  const parts = line.split('\t');
+  const parts = line.split('\t').map(p => p.trim());
   if (parts.length < 4) {
     return null;
   }
