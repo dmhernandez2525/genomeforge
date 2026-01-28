@@ -107,7 +107,7 @@ export class GWASLoader {
    * @param options - Loader options
    */
   async load(options: GWASLoaderOptions = {}): Promise<void> {
-    const { includeAncestry = false, maxAssociations, onProgress } = options;
+    const { maxAssociations, onProgress } = options;
 
     onProgress?.({
       phase: 'downloading',

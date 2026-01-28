@@ -1,6 +1,6 @@
 import pako from 'pako';
 import { db } from '../db';
-import type { PharmGKBRecord, DrugInteraction, DatabaseMetadata } from '../types';
+import type { PharmGKBRecord, DatabaseMetadata } from '../types';
 
 export interface PharmGKBConfig {
   /** URL to the pre-processed PharmGKB JSON bundle */

@@ -1,5 +1,20 @@
-export { ClinVarLoader, type ClinVarConfig } from './clinvar/loader';
+export {
+  ClinVarLoader,
+  type ClinVarConfig,
+  type ClinVarQueryOptions,
+  type ClinVarStats,
+  type ClinVarVersionInfo
+} from './clinvar/loader';
 export { PharmGKBLoader, type PharmGKBConfig } from './pharmgkb/loader';
 export { GWASLoader, type GWASLoaderOptions, type GWASLoadProgress } from './gwas/loader';
 export { GenomeForgeDB, db } from './db';
-export type { DatabaseMetadata, DatabaseUpdateInfo, ClinVarRecord, PharmGKBRecord, GWASRecord } from './types';
+export type {
+  DatabaseMetadata,
+  DatabaseUpdateInfo,
+  ClinVarRecord,
+  ClinicalSignificance,
+  ConditionInfo,
+  PharmGKBRecord,
+  DrugInteraction,
+  GWASRecord
+} from './types';

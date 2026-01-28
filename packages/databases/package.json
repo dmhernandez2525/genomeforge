@@ -6,7 +6,9 @@
   "types": "./src/index.ts",
   "scripts": {
     "build": "tsc",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@genomeforge/types": "workspace:*",
@@ -15,6 +17,8 @@
   },
   "devDependencies": {
     "@types/pako": "^2.0.3",
-    "typescript": "^5.7.2"
+    "fake-indexeddb": "^6.0.0",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
   }
 }
