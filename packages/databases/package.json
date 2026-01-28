@@ -1,0 +1,20 @@
+{
+  "name": "@genomeforge/databases",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@genomeforge/types": "workspace:*",
+    "dexie": "^4.0.10",
+    "pako": "^2.1.0"
+  },
+  "devDependencies": {
+    "@types/pako": "^2.0.3",
+    "typescript": "^5.7.2"
+  }
+}

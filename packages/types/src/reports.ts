@@ -203,3 +203,46 @@ export interface ReportGenerationOptions {
   /** Maximum variants per section */
   maxVariantsPerSection?: number;
 }
+
+// ============================================================================
+// Conversation & Settings Types
+// ============================================================================
+
+/**
+ * AI conversation record
+ */
+export interface Conversation {
+  /** Unique identifier */
+  id: string;
+  /** Associated genome ID */
+  genomeId: string;
+  /** Conversation title */
+  title: string;
+  /** Message history */
+  messages: ConversationMessage[];
+  /** Creation timestamp */
+  createdAt: Date;
+  /** Last message timestamp */
+  lastMessageAt: Date;
+}
+
+export interface ConversationMessage {
+  /** Message role */
+  role: 'user' | 'assistant' | 'system';
+  /** Message content */
+  content: string;
+  /** Timestamp */
+  timestamp: Date;
+}
+
+/**
+ * Settings key-value pair
+ */
+export interface Setting {
+  /** Setting key */
+  key: string;
+  /** Setting value (any serializable type) */
+  value: unknown;
+  /** Is the value encrypted */
+  encrypted: boolean;
+}
