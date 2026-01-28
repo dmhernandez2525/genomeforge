@@ -86,6 +86,13 @@ export default function RootLayout() {
             title: 'Report',
           }}
         />
+        <Stack.Screen
+          name="family"
+          options={{
+            title: 'Family',
+            presentation: 'modal',
+          }}
+        />
       </Stack>
     </>
   );

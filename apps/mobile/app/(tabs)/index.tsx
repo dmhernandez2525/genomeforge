@@ -42,6 +42,14 @@ export default function HomeScreen() {
       route: '/chat',
       color: '#dc2626',
     },
+    {
+      id: 'family',
+      title: 'Family',
+      description: 'Compare variants with family members',
+      icon: 'people' as const,
+      route: '/family',
+      color: '#ec4899',
+    },
   ];
 
   const loadedDatabases = Object.entries(databaseStatus).filter(

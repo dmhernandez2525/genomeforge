@@ -10,3 +10,4 @@ export * from './aiChat';
 export * from './reportGenerator';
 export * from './biometricAuth';
 export * from './variantAnalysis';
+export * from './familySharing';
