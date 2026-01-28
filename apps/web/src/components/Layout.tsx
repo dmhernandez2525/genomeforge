@@ -6,6 +6,7 @@ const navigation = [
   { name: 'Analysis', href: '/analysis' },
   { name: 'Reports', href: '/reports' },
   { name: 'Chat', href: '/chat' },
+  { name: 'Databases', href: '/databases' },
   { name: 'Settings', href: '/settings' }
 ];
 
