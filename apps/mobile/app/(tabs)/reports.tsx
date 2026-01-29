@@ -13,6 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAnalysisStore } from '@/store/analysis';
 import { useReportsStore } from '@/store/reports';
 import { generateReport, type ReportType } from '@/services/reportGenerator';
+import { notifyReportReady, notifyReportError } from '@/services/notifications';
 
 interface ReportTypeConfig {
   id: ReportType;
@@ -90,6 +91,9 @@ export default function ReportsScreen() {
 
       addReport(report);
 
+      // Send notification
+      await notifyReportReady(reportType.name, report.id);
+
       Alert.alert(
         'Report Generated',
         `Your ${reportType.name} has been created successfully.`,
@@ -102,6 +106,8 @@ export default function ReportsScreen() {
         ]
       );
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      await notifyReportError(reportType.name, errorMessage);
       Alert.alert('Error', 'Failed to generate report. Please try again.');
     } finally {
       setGenerating(null);

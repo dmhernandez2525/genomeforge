@@ -16,6 +16,7 @@ import { useAnalysisStore } from '@/store/analysis';
 import { useReportsStore } from '@/store/reports';
 import { useChatStore } from '@/store/chat';
 import { useAuthStore } from '@/store/auth';
+import { useNotificationStore } from '@/store/notifications';
 import { getBiometricTypeLabel } from '@/services/biometricAuth';
 
 interface SettingItem {
@@ -50,9 +51,9 @@ export default function SettingsScreen() {
     error,
     clearError,
   } = useAuthStore();
+  const { unreadCount, settings: notificationSettings } = useNotificationStore();
 
   const [biometricLabel, setBiometricLabel] = useState('Biometric');
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [analyticsEnabled, setAnalyticsEnabled] = useState(false);
 
   useEffect(() => {
@@ -206,12 +207,15 @@ export default function SettingsScreen() {
         {
           id: 'notifications',
           title: 'Notifications',
-          description: 'Receive updates about your analysis',
+          description: notificationSettings.enabled
+            ? unreadCount > 0
+              ? `${unreadCount} unread notification${unreadCount !== 1 ? 's' : ''}`
+              : 'Enabled'
+            : 'Disabled',
           icon: 'notifications',
           iconColor: '#2563eb',
-          type: 'switch',
-          value: notificationsEnabled,
-          onToggle: setNotificationsEnabled,
+          type: 'link',
+          onPress: () => router.push('/notifications'),
         },
         {
           id: 'analytics',

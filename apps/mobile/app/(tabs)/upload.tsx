@@ -4,6 +4,11 @@ import * as DocumentPicker from 'expo-document-picker';
 import { useRouter } from 'expo-router';
 import { useAnalysisStore } from '@/store/analysis';
 import { useGenomeProcessing } from '@/hooks/useGenomeProcessing';
+import {
+  notifyAnalysisStarted,
+  notifyAnalysisComplete,
+  notifyAnalysisError,
+} from '@/services/notifications';
 
 interface FileFormat {
   id: string;
@@ -43,6 +48,8 @@ export default function UploadScreen() {
   const { state, processFile, reset } = useGenomeProcessing();
 
   const handleFilePick = async () => {
+    const startTime = Date.now();
+
     try {
       const result = await DocumentPicker.getDocumentAsync({
         type: ['text/plain', 'application/x-gzip', '*/*'],
@@ -55,13 +62,22 @@ export default function UploadScreen() {
 
       const file = result.assets[0];
 
+      // Send notification that analysis is starting
+      await notifyAnalysisStarted(0); // We don't know the count yet
+
       // Process the file using our genome processing hook
       const processingResult = await processFile(file.uri, file.name);
 
       if (processingResult.analysis) {
+        const duration = Date.now() - startTime;
+        const findingsCount = processingResult.analysis.summary.actionableFindings;
+
+        // Send notification that analysis is complete
+        await notifyAnalysisComplete(findingsCount, duration);
+
         Alert.alert(
           'Processing Complete',
-          `Successfully analyzed ${processingResult.genome?.totalVariants.toLocaleString()} variants.\n\nFound ${processingResult.analysis.summary.actionableFindings} actionable findings.`,
+          `Successfully analyzed ${processingResult.genome?.totalVariants.toLocaleString()} variants.\n\nFound ${findingsCount} actionable findings.`,
           [
             {
               text: 'View Analysis',
@@ -72,10 +88,12 @@ export default function UploadScreen() {
         );
       }
     } catch (error) {
-      Alert.alert(
-        'Processing Failed',
-        error instanceof Error ? error.message : 'Failed to process file'
-      );
+      const errorMessage = error instanceof Error ? error.message : 'Failed to process file';
+
+      // Send error notification
+      await notifyAnalysisError(errorMessage);
+
+      Alert.alert('Processing Failed', errorMessage);
     }
   };
 
