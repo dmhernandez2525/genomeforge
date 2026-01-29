@@ -6,12 +6,15 @@
   "types": "./src/index.ts",
   "scripts": {
     "build": "tsc",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "test": "vitest"
   },
   "dependencies": {
     "@genomeforge/types": "workspace:*"
   },
   "devDependencies": {
-    "typescript": "^5.7.2"
+    "jsdom": "^26.0.0",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.9"
   }
 }
