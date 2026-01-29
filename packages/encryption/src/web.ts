@@ -51,7 +51,7 @@ export class WebEncryption {
     const key = await crypto.subtle.deriveKey(
       {
         name: ENCRYPTION_CONSTANTS.KDF,
-        salt: actualSalt,
+        salt: this.toBufferSource(actualSalt),
         iterations: this.iterations,
         hash: 'SHA-256'
       },
@@ -83,7 +83,7 @@ export class WebEncryption {
 
     // Encrypt
     const ciphertext = await crypto.subtle.encrypt(
-      { name: ENCRYPTION_CONSTANTS.ALGORITHM, iv },
+      { name: ENCRYPTION_CONSTANTS.ALGORITHM, iv: this.toBufferSource(iv) },
       key,
       new TextEncoder().encode(data)
     );
@@ -128,7 +128,7 @@ export class WebEncryption {
       const derivedKey = await crypto.subtle.deriveKey(
         {
           name: ENCRYPTION_CONSTANTS.KDF,
-          salt,
+          salt: this.toBufferSource(salt),
           iterations,
           hash: 'SHA-256'
         },
@@ -142,9 +142,9 @@ export class WebEncryption {
       );
 
       const plaintext = await crypto.subtle.decrypt(
-        { name: ENCRYPTION_CONSTANTS.ALGORITHM, iv },
+        { name: ENCRYPTION_CONSTANTS.ALGORITHM, iv: this.toBufferSource(iv) },
         derivedKey,
-        ciphertext
+        this.toBufferSource(ciphertext)
       );
 
       return new TextDecoder().decode(plaintext);
@@ -152,9 +152,9 @@ export class WebEncryption {
 
     // Decrypt
     const plaintext = await crypto.subtle.decrypt(
-      { name: ENCRYPTION_CONSTANTS.ALGORITHM, iv },
+      { name: ENCRYPTION_CONSTANTS.ALGORITHM, iv: this.toBufferSource(iv) },
       key,
-      ciphertext
+      this.toBufferSource(ciphertext)
     );
 
     return new TextDecoder().decode(plaintext);
@@ -213,5 +213,13 @@ export class WebEncryption {
 
   private base64Decode(encoded: string): Uint8Array {
     return Uint8Array.from(atob(encoded), (c) => c.charCodeAt(0));
+  }
+
+  /**
+   * Convert Uint8Array to BufferSource for Web Crypto API compatibility
+   * TypeScript strictness requires explicit typing for ArrayBuffer vs ArrayBufferLike
+   */
+  private toBufferSource(data: Uint8Array): Uint8Array<ArrayBuffer> {
+    return data as Uint8Array<ArrayBuffer>;
   }
 }

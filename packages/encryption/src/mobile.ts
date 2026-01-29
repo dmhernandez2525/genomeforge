@@ -15,8 +15,9 @@ import type { EncryptedData, EncryptionConfig } from './types';
 import { ENCRYPTION_CONSTANTS } from './types';
 
 // Type declarations for expo modules (actual imports happen at runtime)
+type DigestAlgorithm = 'SHA-256' | 'SHA-384' | 'SHA-512' | 'MD5';
 type ExpoCrypto = {
-  digestStringAsync: (algorithm: string, data: string) => Promise<string>;
+  digestStringAsync: (algorithm: DigestAlgorithm, data: string) => Promise<string>;
   getRandomBytes: (byteCount: number) => Uint8Array;
 };
 

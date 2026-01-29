@@ -15,7 +15,7 @@ interface SettingsState {
 
 export const useSettingsStore = create<SettingsState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       aiProvider: null,
       theme: 'system',
       hasApiKey: {
@@ -26,7 +26,7 @@ export const useSettingsStore = create<SettingsState>()(
       },
       setAiProvider: (provider) => set({ aiProvider: provider }),
       setTheme: (theme) => set({ theme }),
-      setApiKey: async (provider, key) => {
+      setApiKey: async (provider, _key) => {
         // TODO: Encrypt and store the key using @genomeforge/encryption
         // For now, just mark that we have a key
         set((state) => ({

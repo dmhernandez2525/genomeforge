@@ -11,6 +11,7 @@ export * from './parser';
 export * from './matcher';
 export * from './analyzer';
 export * from './reporter';
+export * from './ai';
 
 // Re-export commonly used types
 export type {
