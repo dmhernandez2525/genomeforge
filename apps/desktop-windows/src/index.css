@@ -1,0 +1,155 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base styles for Windows native look */
+:root {
+  --titlebar-height: 32px;
+  color-scheme: light dark;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue',
+    Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  background-color: #f3f3f3;
+  overflow: hidden;
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #202020;
+    color: #ffffff;
+  }
+}
+
+/* Custom scrollbar for Windows look */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border: 3px solid #f1f1f1;
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+@media (prefers-color-scheme: dark) {
+  ::-webkit-scrollbar-track {
+    background: #2b2b2b;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #555555;
+    border: 3px solid #2b2b2b;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #666666;
+  }
+}
+
+/* Windows-style focus ring */
+*:focus-visible {
+  outline: 2px solid #005fb8;
+  outline-offset: 1px;
+}
+
+/* Prevent drag on interactive elements */
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-user-drag: none;
+}
+
+/* Windows-style button */
+.btn-win {
+  @apply px-4 py-1.5 rounded text-sm font-medium;
+  @apply bg-white border border-gray-300;
+  @apply hover:bg-gray-50 active:bg-gray-100;
+  @apply transition-colors duration-100;
+}
+
+.btn-win-primary {
+  @apply bg-primary-600 text-white border-primary-700;
+  @apply hover:bg-primary-700 active:bg-primary-800;
+}
+
+.btn-win-accent {
+  @apply bg-[#005fb8] text-white border-[#004e9a];
+  @apply hover:bg-[#004e9a] active:bg-[#003d7a];
+}
+
+@media (prefers-color-scheme: dark) {
+  .btn-win {
+    @apply bg-[#2b2b2b] border-[#3b3b3b] text-white;
+    @apply hover:bg-[#3b3b3b] active:bg-[#4b4b4b];
+  }
+}
+
+/* Windows-style card */
+.card-win {
+  @apply bg-white rounded border border-gray-200;
+}
+
+@media (prefers-color-scheme: dark) {
+  .card-win {
+    @apply bg-[#2b2b2b] border-[#3b3b3b];
+  }
+}
+
+/* Windows 11 Mica-like effect (simplified) */
+.mica {
+  @apply bg-white/80 backdrop-blur-xl;
+}
+
+@media (prefers-color-scheme: dark) {
+  .mica {
+    @apply bg-[#202020]/80;
+  }
+}
+
+/* Navigation item style */
+.nav-item {
+  @apply flex items-center gap-3 px-3 py-2 rounded transition-colors;
+  @apply text-gray-700 hover:bg-gray-100;
+}
+
+.nav-item.active {
+  @apply bg-primary-100 text-primary-700;
+}
+
+@media (prefers-color-scheme: dark) {
+  .nav-item {
+    @apply text-gray-300 hover:bg-[#3b3b3b];
+  }
+
+  .nav-item.active {
+    @apply bg-primary-900/50 text-primary-400;
+  }
+}
+
+/* Titlebar draggable region */
+[data-tauri-drag-region] {
+  -webkit-app-region: drag;
+}
+
+[data-tauri-drag-region] button,
+[data-tauri-drag-region] a,
+[data-tauri-drag-region] input {
+  -webkit-app-region: no-drag;
+}
