@@ -11,7 +11,6 @@ import type {
   DatabaseImportProgress,
   DatabaseImportResult,
   CustomDatabase,
-  RecordValidation,
   PredefinedSchemaType,
 } from './types';
 import { getPredefinedSchema } from './schemas';

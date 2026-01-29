@@ -10,7 +10,6 @@ import type {
   BatchConfig,
   BatchProgress,
   BatchSummary,
-  BatchStatus,
   BatchStats,
   BatchEvent,
   BatchEventType,

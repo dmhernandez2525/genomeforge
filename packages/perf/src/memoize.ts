@@ -46,18 +46,18 @@ export function memoize<T extends (...args: unknown[]) => unknown>(
 /**
  * Memoize an async function
  */
-export function memoizeAsync<T extends (...args: unknown[]) => Promise<unknown>>(
-  fn: T,
+export function memoizeAsync<TArgs extends unknown[], TResult>(
+  fn: (...args: TArgs) => Promise<TResult>,
   options?: MemoizeOptions
-): T & { cache: Cache<Awaited<ReturnType<T>>>; clear: () => void } {
-  const cache = createCache<Awaited<ReturnType<T>>>(options?.cache);
+): ((...args: TArgs) => Promise<TResult>) & { cache: Cache<TResult>; clear: () => void } {
+  const cache = createCache<TResult>(options?.cache);
   const keyGen = options?.keyGenerator || defaultKeyGenerator;
-  const pending = new Map<string, Promise<Awaited<ReturnType<T>>>>();
+  const pending = new Map<string, Promise<TResult>>();
 
   const memoized = async function (
     this: unknown,
-    ...args: Parameters<T>
-  ): Promise<Awaited<ReturnType<T>>> {
+    ...args: TArgs
+  ): Promise<TResult> {
     const key = keyGen(...args);
 
     // Check cache
@@ -73,13 +73,14 @@ export function memoizeAsync<T extends (...args: unknown[]) => Promise<unknown>>
     }
 
     // Execute and cache
-    const promise = (async () => {
-      const result = (await fn.apply(this, args)) as Awaited<ReturnType<T>>;
+    const execute = async (): Promise<TResult> => {
+      const result = await fn.apply(this, args);
       cache.set(key, result);
       pending.delete(key);
       return result;
-    })();
+    };
 
+    const promise = execute();
     pending.set(key, promise);
 
     try {
@@ -88,7 +89,7 @@ export function memoizeAsync<T extends (...args: unknown[]) => Promise<unknown>>
       pending.delete(key);
       throw error;
     }
-  } as T & { cache: Cache<Awaited<ReturnType<T>>>; clear: () => void };
+  } as ((...args: TArgs) => Promise<TResult>) & { cache: Cache<TResult>; clear: () => void };
 
   memoized.cache = cache;
   memoized.clear = () => {

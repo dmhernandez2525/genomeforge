@@ -26,6 +26,7 @@ export const ROLE_CATEGORIES: Record<ARIARole, ARIARoleCategory> = {
   button: 'widget',
   checkbox: 'widget',
   dialog: 'widget',
+  grid: 'widget',
   gridcell: 'widget',
   link: 'widget',
   listbox: 'widget',
@@ -49,6 +50,7 @@ export const ROLE_CATEGORIES: Record<ARIARole, ARIARoleCategory> = {
   textbox: 'widget',
   tooltip: 'widget',
   tree: 'widget',
+  treegrid: 'widget',
   treeitem: 'widget',
 
   // Document structure roles

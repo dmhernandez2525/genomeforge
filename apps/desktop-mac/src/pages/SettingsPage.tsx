@@ -21,9 +21,9 @@ interface DatabaseStatusData {
 }
 
 export default function SettingsPage() {
-  const { hasGenomeData, genomeData, databaseStatus, clearAllData } = useAppStore();
+  const { hasGenomeData, databaseStatus, clearAllData } = useAppStore();
   const [appVersion, setAppVersion] = useState('');
-  const [dbStatus, setDbStatus] = useState<DatabaseStatusData | null>(null);
+  const [_dbStatus, setDbStatus] = useState<DatabaseStatusData | null>(null);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   useEffect(() => {

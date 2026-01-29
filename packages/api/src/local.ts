@@ -188,7 +188,7 @@ export class GenomeForgeLocal {
       }
 
       this.emit('request_error', { method: 'analyze', error });
-      return this.createResponse(
+      return this.createResponse<AnalysisResult>(
         false,
         undefined,
         {
@@ -206,7 +206,7 @@ export class GenomeForgeLocal {
   getAnalysis(analysisId: string): ApiResponse<AnalysisResult> {
     const analysis = this.analyses.get(analysisId);
     if (!analysis) {
-      return this.createResponse(false, undefined, {
+      return this.createResponse<AnalysisResult>(false, undefined, {
         code: 'NOT_FOUND',
         message: `Analysis not found: ${analysisId}`,
       });
@@ -237,7 +237,7 @@ export class GenomeForgeLocal {
     const analysis = this.analyses.get(request.analysisId);
 
     if (!analysis) {
-      return this.createResponse(false, undefined, {
+      return this.createResponse<ReportResult>(false, undefined, {
         code: 'ANALYSIS_NOT_FOUND',
         message: `Analysis not found: ${request.analysisId}`,
       });

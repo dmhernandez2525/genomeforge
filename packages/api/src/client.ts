@@ -175,7 +175,7 @@ export class GenomeForgeClient {
         500
       );
       this.emit('request_error', { method: 'startAnalysis', error: apiError });
-      return this.createResponse(false, undefined, apiError, Date.now() - startTime);
+      return this.createResponse<AnalysisResult>(false, undefined, apiError, Date.now() - startTime);
     }
   }
 
@@ -214,7 +214,7 @@ export class GenomeForgeClient {
         `Analysis not found: ${analysisId}`,
         404
       );
-      return this.createResponse(false, undefined, apiError, Date.now() - startTime);
+      return this.createResponse<AnalysisResult>(false, undefined, apiError, Date.now() - startTime);
     }
   }
 
@@ -271,7 +271,7 @@ export class GenomeForgeClient {
         error instanceof Error ? error.message : 'Failed to fetch results',
         500
       );
-      return this.createResponse(false, undefined, apiError, Date.now() - startTime);
+      return this.createResponse<AnalysisResult>(false, undefined, apiError, Date.now() - startTime);
     }
   }
 
@@ -290,7 +290,7 @@ export class GenomeForgeClient {
         'Failed to cancel analysis',
         500
       );
-      return this.createResponse(false, undefined, apiError, Date.now() - startTime);
+      return this.createResponse<{ cancelled: boolean }>(false, undefined, apiError, Date.now() - startTime);
     }
   }
 
@@ -320,7 +320,7 @@ export class GenomeForgeClient {
         'Failed to list analyses',
         500
       );
-      return this.createResponse(false, undefined, apiError, Date.now() - startTime);
+      return this.createResponse<PaginatedResponse<AnalysisResult>>(false, undefined, apiError, Date.now() - startTime);
     }
   }
 
@@ -348,7 +348,7 @@ export class GenomeForgeClient {
         'Failed to generate report',
         500
       );
-      return this.createResponse(false, undefined, apiError, Date.now() - startTime);
+      return this.createResponse<ReportResult>(false, undefined, apiError, Date.now() - startTime);
     }
   }
 
@@ -374,7 +374,7 @@ export class GenomeForgeClient {
         `Report not found: ${reportId}`,
         404
       );
-      return this.createResponse(false, undefined, apiError, Date.now() - startTime);
+      return this.createResponse<ReportResult>(false, undefined, apiError, Date.now() - startTime);
     }
   }
 
@@ -401,7 +401,7 @@ export class GenomeForgeClient {
         'Database query failed',
         500
       );
-      return this.createResponse(false, undefined, apiError, Date.now() - startTime);
+      return this.createResponse<DatabaseResult>(false, undefined, apiError, Date.now() - startTime);
     }
   }
 
@@ -442,7 +442,7 @@ export class GenomeForgeClient {
         Date.now() - startTime
       );
     } catch (error) {
-      return this.createResponse(
+      return this.createResponse<{ healthy: boolean; version: string }>(
         false,
         undefined,
         this.createError('HEALTH_CHECK_FAILED', 'Service unhealthy', 503),
