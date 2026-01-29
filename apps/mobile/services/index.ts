@@ -12,3 +12,4 @@ export * from './biometricAuth';
 export * from './variantAnalysis';
 export * from './familySharing';
 export * from './dataExport';
+export * from './variantSearch';

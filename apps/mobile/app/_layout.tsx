@@ -100,6 +100,13 @@ export default function RootLayout() {
             presentation: 'modal',
           }}
         />
+        <Stack.Screen
+          name="search"
+          options={{
+            title: 'Search Variants',
+            presentation: 'modal',
+          }}
+        />
       </Stack>
     </>
   );

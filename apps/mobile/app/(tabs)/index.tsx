@@ -50,6 +50,15 @@ export default function HomeScreen() {
       route: '/family',
       color: '#ec4899',
     },
+    {
+      id: 'search',
+      title: 'Search',
+      description: 'Find variants by gene, rsID, or condition',
+      icon: 'search' as const,
+      route: '/search',
+      color: '#6b7280',
+      disabled: !hasGenomeData,
+    },
   ];
 
   const loadedDatabases = Object.entries(databaseStatus).filter(
