@@ -10,6 +10,7 @@
 export * from './parser';
 export * from './matcher';
 export * from './analyzer';
+export * from './reporter';
 
 // Re-export commonly used types
 export type {
