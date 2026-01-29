@@ -7,32 +7,74 @@
 import type { WebhookConfig, WebhookPayload, WebhookEvent } from './types';
 
 /**
- * Create a webhook signature
- * Uses HMAC-SHA256 for signature generation
+ * Create a webhook signature using HMAC-SHA256
+ * Works in both browser (SubtleCrypto) and Node.js (crypto) environments
+ */
+export async function createWebhookSignatureAsync(
+  payload: string,
+  secret: string
+): Promise<string> {
+  const encoder = new TextEncoder();
+  const keyData = encoder.encode(secret);
+  const messageData = encoder.encode(payload);
+
+  // Use Web Crypto API (available in browsers and Node.js 15+)
+  if (typeof crypto !== 'undefined' && crypto.subtle) {
+    const key = await crypto.subtle.importKey(
+      'raw',
+      keyData,
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign']
+    );
+
+    const signature = await crypto.subtle.sign('HMAC', key, messageData);
+    const hashArray = Array.from(new Uint8Array(signature));
+    const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+
+    return `sha256=${hashHex}`;
+  }
+
+  // Fallback for older Node.js environments
+  try {
+    // Dynamic import to avoid bundler issues
+    const cryptoModule = await import('crypto');
+    const hmac = cryptoModule.createHmac('sha256', secret);
+    hmac.update(payload);
+    return `sha256=${hmac.digest('hex')}`;
+  } catch {
+    throw new Error('HMAC-SHA256 is not available in this environment');
+  }
+}
+
+/**
+ * Synchronous signature creation (for backwards compatibility)
+ * Uses Node.js crypto module - throws in browser environments
  */
 export function createWebhookSignature(
   payload: string,
   secret: string
 ): string {
-  // In a browser environment, use SubtleCrypto
-  // In Node.js, use crypto module
-  // This is a simplified implementation
-  const encoder = new TextEncoder();
-  const data = encoder.encode(payload + secret);
-
-  // Simple hash for demonstration - in production use proper HMAC
-  let hash = 0;
-  for (let i = 0; i < data.length; i++) {
-    const char = data[i];
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32bit integer
+  // This synchronous version only works in Node.js
+  // For browser compatibility, use createWebhookSignatureAsync
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const crypto = require('crypto');
+    const hmac = crypto.createHmac('sha256', secret);
+    hmac.update(payload);
+    return `sha256=${hmac.digest('hex')}`;
+  } catch {
+    // For synchronous fallback in environments without Node.js crypto,
+    // we throw an error directing users to the async version
+    throw new Error(
+      'Synchronous webhook signature creation requires Node.js crypto module. ' +
+      'Use createWebhookSignatureAsync() for browser compatibility.'
+    );
   }
-
-  return `sha256=${Math.abs(hash).toString(16).padStart(8, '0')}`;
 }
 
 /**
- * Verify a webhook signature
+ * Verify a webhook signature (synchronous - Node.js only)
  */
 export function verifyWebhookSignature(
   payload: string,
@@ -40,11 +82,39 @@ export function verifyWebhookSignature(
   secret: string
 ): boolean {
   const expectedSignature = createWebhookSignature(payload, secret);
-  return signature === expectedSignature;
+  return timingSafeEqual(signature, expectedSignature);
 }
 
 /**
- * Create a webhook payload
+ * Verify a webhook signature (async - works in browser and Node.js)
+ */
+export async function verifyWebhookSignatureAsync(
+  payload: string,
+  signature: string,
+  secret: string
+): Promise<boolean> {
+  const expectedSignature = await createWebhookSignatureAsync(payload, secret);
+  return timingSafeEqual(signature, expectedSignature);
+}
+
+/**
+ * Timing-safe string comparison to prevent timing attacks
+ */
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) {
+    return false;
+  }
+
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+
+  return result === 0;
+}
+
+/**
+ * Create a webhook payload (synchronous - Node.js only)
  */
 export function createWebhookPayload(
   event: WebhookEvent,
@@ -59,6 +129,27 @@ export function createWebhookPayload(
 
   if (secret) {
     payload.signature = createWebhookSignature(JSON.stringify(payload), secret);
+  }
+
+  return payload;
+}
+
+/**
+ * Create a webhook payload (async - works in browser and Node.js)
+ */
+export async function createWebhookPayloadAsync(
+  event: WebhookEvent,
+  data: Record<string, unknown>,
+  secret?: string
+): Promise<WebhookPayload> {
+  const payload: WebhookPayload = {
+    event,
+    timestamp: new Date().toISOString(),
+    data,
+  };
+
+  if (secret) {
+    payload.signature = await createWebhookSignatureAsync(JSON.stringify(payload), secret);
   }
 
   return payload;
@@ -122,7 +213,7 @@ export class WebhookManager {
   async process(payload: WebhookPayload, secret?: string): Promise<boolean> {
     // Verify signature if secret is provided
     if (secret && payload.signature) {
-      const isValid = verifyWebhookSignature(
+      const isValid = await verifyWebhookSignatureAsync(
         JSON.stringify({ event: payload.event, timestamp: payload.timestamp, data: payload.data }),
         payload.signature,
         secret
