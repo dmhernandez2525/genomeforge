@@ -14,6 +14,7 @@ export * from './reporter';
 export * from './ai';
 export * from './batch';
 export * from './database';
+export * from './reporting';
 
 // Re-export commonly used types
 export type {
