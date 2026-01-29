@@ -3,9 +3,9 @@ export interface DatabaseMetadata {
   version: string;
   lastUpdated: Date;
   recordCount: number;
-  checksum: string;
+  checksum?: string;
   source: string;
-  license: string;
+  license?: string;
 }
 
 export interface DatabaseUpdateInfo {
@@ -62,4 +62,22 @@ export interface DrugInteraction {
   phenotypeText: string;
   dosingGuideline?: string;
   cpicGuideline?: string;
+}
+
+/**
+ * GWAS Catalog association record
+ *
+ * Contains genome-wide association study results.
+ * License: CC0 (Public Domain) for most data.
+ */
+export interface GWASRecord {
+  rsid: string;
+  chromosome: string;
+  position: number;
+  trait: string;
+  pValue: number;
+  orBeta?: number;
+  riskAllele?: string;
+  studyAccession: string;
+  pubmedId?: string;
 }

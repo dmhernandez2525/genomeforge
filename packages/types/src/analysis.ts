@@ -4,6 +4,7 @@
  */
 
 import type { SNP } from './genome';
+import type { RiskLevel } from './reports';
 
 // ============================================================================
 // ClinVar Types
@@ -161,6 +162,8 @@ export interface AnnotatedSNP {
   pharmgkb?: PharmGKBVariant;
   /** gnomAD frequency (if matched) */
   gnomad?: GnomADFrequency;
+  /** GWAS associations (if matched) */
+  gwas?: GWASAssociation[];
   /** Calculated impact score (0-6) */
   impactScore: number;
   /** Variant category */
@@ -180,6 +183,8 @@ export interface MatchResult {
   drugInteractionCount: number;
   /** Count of carrier statuses */
   carrierCount: number;
+  /** Count of GWAS associations */
+  gwasAssociationCount: number;
   /** All annotated SNPs sorted by impact */
   annotatedSNPs: AnnotatedSNP[];
   /** Summary statistics */
@@ -191,6 +196,7 @@ export interface MatchResult {
     clinvar: string;
     pharmgkb: string;
     gnomad?: string;
+    gwas?: string;
   };
 }
 
@@ -203,6 +209,8 @@ export interface MatchSummary {
   pharmacogenes: string[];
   /** Carrier statuses identified */
   carrierStatuses: string[];
+  /** Top GWAS traits with associations */
+  gwasTraits: string[];
 }
 
 // ============================================================================
@@ -226,4 +234,251 @@ export interface DatabaseStatus {
   clinvar: { loaded: boolean; version: string | null; recordCount: number };
   pharmgkb: { loaded: boolean; version: string | null; recordCount: number };
   gnomad: { loaded: boolean; version: string | null; recordCount: number };
+  gwas: { loaded: boolean; version: string | null; recordCount: number };
+}
+
+// ============================================================================
+// GWAS Association Types
+// ============================================================================
+
+export interface GWASAssociation {
+  /** rsID */
+  rsid: string;
+  /** Trait or phenotype */
+  trait: string;
+  /** p-value from study */
+  pValue: number;
+  /** Odds ratio or beta coefficient */
+  orBeta?: number;
+  /** Risk allele */
+  riskAllele?: string;
+  /** Study accession */
+  studyAccession: string;
+  /** PubMed ID */
+  pubmedId?: string;
+  /** User's genotype */
+  userGenotype?: string;
+  /** Whether user has risk allele */
+  hasRiskAllele?: boolean;
+  /** Number of risk allele copies (0, 1, or 2) */
+  riskAlleleCopies?: number;
+}
+
+export interface TraitAssociation {
+  /** Trait name */
+  trait: string;
+  /** Normalized trait category */
+  category: TraitCategory;
+  /** Number of associated variants */
+  variantCount: number;
+  /** Associated GWAS records */
+  associations: GWASAssociation[];
+  /** Combined risk score for this trait (0-1) */
+  riskScore: number;
+  /** Risk interpretation */
+  interpretation: 'increased' | 'typical' | 'decreased' | 'unknown';
+  /** Confidence level based on study count and effect sizes */
+  confidence: 'high' | 'moderate' | 'low';
+}
+
+export type TraitCategory =
+  | 'disease'
+  | 'cardiovascular'
+  | 'metabolic'
+  | 'neurological'
+  | 'autoimmune'
+  | 'cancer'
+  | 'physical_trait'
+  | 'response'
+  | 'other';
+
+// ============================================================================
+// Polygenic Risk Score Types
+// ============================================================================
+
+export interface PolygenicRiskScore {
+  /** Trait or condition */
+  trait: string;
+  /** Raw PRS value (sum of weighted effect alleles) */
+  rawScore: number;
+  /** Z-score (standardized relative to reference population) */
+  zScore: number;
+  /** Percentile in reference population (0-100) */
+  percentile: number;
+  /** Risk category */
+  riskCategory: 'very_high' | 'high' | 'moderate' | 'average' | 'low' | 'very_low';
+  /** Number of variants included in calculation */
+  variantsUsed: number;
+  /** Number of variants missing from user's data */
+  variantsMissing: number;
+  /** Coverage percentage */
+  coverage: number;
+  /** Relative risk compared to average */
+  relativeRisk?: number;
+  /** Confidence interval if available */
+  confidenceInterval?: { lower: number; upper: number };
+}
+
+export interface PRSModelInfo {
+  /** Model identifier */
+  modelId: string;
+  /** Trait being scored */
+  trait: string;
+  /** Number of variants in model */
+  variantCount: number;
+  /** Reference population */
+  referencePopulation: string;
+  /** Model source/publication */
+  source: string;
+  /** Model validation metrics */
+  validation?: {
+    auc?: number;
+    r2?: number;
+    sampleSize?: number;
+  };
+}
+
+// ============================================================================
+// Enhanced Analysis Result Types
+// ============================================================================
+
+export interface EnhancedAnalysisResult {
+  /** Genome identifier */
+  genomeId: string;
+  /** Analysis timestamp */
+  analyzedAt: Date;
+  /** Risk assessments from ClinVar */
+  riskAssessments: RiskAssessment[];
+  /** Metabolizer phenotypes from PharmGKB */
+  metabolizerPhenotypes: EnhancedMetabolizerPhenotype[];
+  /** Carrier statuses for recessive conditions */
+  carrierStatuses: EnhancedCarrierStatus[];
+  /** GWAS trait associations */
+  traitAssociations: TraitAssociation[];
+  /** Polygenic risk scores */
+  polygenicRiskScores: PolygenicRiskScore[];
+  /** Analysis summary */
+  summary: EnhancedAnalysisSummary;
+  /** Database versions used */
+  databaseVersions: {
+    clinvar?: string;
+    pharmgkb?: string;
+    gwas?: string;
+  };
+}
+
+export interface RiskAssessment {
+  /** Condition name */
+  condition: string;
+  /** Gene symbol */
+  gene: string;
+  /** Risk level */
+  riskLevel: RiskLevel;
+  /** Confidence score (0-1) */
+  confidence: number;
+  /** Contributing variants */
+  variants: AnnotatedSNP[];
+  /** Human-readable explanation */
+  explanation: string;
+  /** Inheritance pattern if known */
+  inheritance?: 'autosomal_dominant' | 'autosomal_recessive' | 'x_linked' | 'complex';
+  /** OMIM ID if available */
+  omimId?: string;
+}
+
+export interface EnhancedMetabolizerPhenotype {
+  /** Gene symbol */
+  gene: string;
+  /** Diplotype (e.g., "*1/*2") */
+  diplotype?: string;
+  /** Phenotype classification */
+  phenotype: MetabolizerStatus;
+  /** Activity score if applicable */
+  activityScore?: number;
+  /** Affected drugs with dosing recommendations */
+  affectedDrugs: DrugRecommendation[];
+  /** CPIC guideline status */
+  cpicStatus?: 'available' | 'in_progress' | 'not_available';
+  /** Key variants contributing to phenotype */
+  contributingVariants: string[];
+}
+
+export type MetabolizerStatus =
+  | 'ultrarapid'
+  | 'rapid'
+  | 'normal'
+  | 'intermediate'
+  | 'poor'
+  | 'unknown';
+
+export interface DrugRecommendation {
+  /** Drug name */
+  drugName: string;
+  /** Generic name */
+  genericName?: string;
+  /** Recommendation text */
+  recommendation: string;
+  /** Severity of interaction */
+  severity: 'critical' | 'moderate' | 'informational';
+  /** Evidence level (1A, 1B, 2A, 2B, 3, 4) */
+  evidenceLevel: string;
+  /** Has FDA label */
+  hasFDALabel: boolean;
+  /** CPIC recommendation strength */
+  cpicLevel?: string;
+  /** Therapeutic category */
+  therapeuticCategory?: string;
+}
+
+export interface EnhancedCarrierStatus {
+  /** Gene symbol */
+  gene: string;
+  /** Condition name */
+  condition: string;
+  /** Inheritance pattern */
+  inheritance: 'autosomal_recessive' | 'x_linked' | 'mitochondrial';
+  /** Carrier type */
+  carrierType: 'heterozygous' | 'compound_heterozygous' | 'x_linked_female';
+  /** Risk if partner is also carrier */
+  partnerRisk: string;
+  /** Condition frequency in general population */
+  populationFrequency?: number;
+  /** ClinVar variant accession */
+  variantAccession?: string;
+  /** OMIM ID */
+  omimId?: string;
+}
+
+export interface EnhancedAnalysisSummary {
+  /** Total variants analyzed */
+  totalVariantsAnalyzed: number;
+  /** Pathogenic/likely pathogenic variants */
+  pathogenicCount: number;
+  /** High risk conditions */
+  highRiskCount: number;
+  /** Moderate risk conditions */
+  moderateRiskCount: number;
+  /** Pharmacogenomic genes with actionable findings */
+  pharmacogeneCount: number;
+  /** Carrier statuses identified */
+  carrierCount: number;
+  /** GWAS traits with associations */
+  traitAssociationCount: number;
+  /** Polygenic risk scores calculated */
+  prsCount: number;
+  /** Key findings for quick review */
+  keyFindings: KeyFinding[];
+}
+
+export interface KeyFinding {
+  /** Finding type */
+  type: 'pathogenic' | 'drug' | 'carrier' | 'trait' | 'prs';
+  /** Priority for display */
+  priority: 'urgent' | 'important' | 'informational';
+  /** Short title */
+  title: string;
+  /** Description */
+  description: string;
+  /** Related gene or trait */
+  relatedItem: string;
 }

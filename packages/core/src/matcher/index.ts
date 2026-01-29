@@ -9,7 +9,6 @@
 
 import type {
   ParsedGenome,
-  SNP,
   AnnotatedSNP,
   MatchResult,
   MatchSummary,
@@ -17,7 +16,8 @@ import type {
   PharmGKBVariant,
   GnomADFrequency,
   VariantCategory,
-  ClinicalSignificance
+  ClinicalSignificance,
+  GWASAssociation
 } from '@genomeforge/types';
 
 // ============================================================================
@@ -27,17 +27,22 @@ import type {
 export interface MatchOptions {
   /** Include population frequency data */
   includeFrequency?: boolean;
+  /** Include GWAS trait associations */
+  includeGWAS?: boolean;
   /** Minimum impact score to include */
   minImpactScore?: number;
   /** Maximum results to return */
   maxResults?: number;
+  /** Minimum GWAS p-value threshold (default: 5e-8) */
+  gwasPValueThreshold?: number;
 }
 
 export interface DatabaseInterface {
   getClinVar(rsids: string[]): Promise<Map<string, ClinVarVariant>>;
   getPharmGKB(rsids: string[]): Promise<Map<string, PharmGKBVariant>>;
   getGnomAD(rsids: string[]): Promise<Map<string, GnomADFrequency>>;
-  getVersions(): Promise<{ clinvar: string; pharmgkb: string; gnomad?: string }>;
+  getGWAS(rsids: string[]): Promise<Map<string, GWASAssociation[]>>;
+  getVersions(): Promise<{ clinvar: string; pharmgkb: string; gnomad?: string; gwas?: string }>;
 }
 
 // ============================================================================
@@ -149,17 +154,20 @@ export async function matchGenome(
 ): Promise<MatchResult> {
   const {
     includeFrequency = false,
+    includeGWAS = true,
     minImpactScore = 0,
-    maxResults = 1000
+    maxResults = 1000,
+    gwasPValueThreshold = 5e-8
   } = options;
 
   const userRsids = Array.from(genome.snps.keys());
 
   // Batch lookup from databases
-  const [clinvarMap, pharmgkbMap, gnomadMap, versions] = await Promise.all([
+  const [clinvarMap, pharmgkbMap, gnomadMap, gwasMap, versions] = await Promise.all([
     db.getClinVar(userRsids),
     db.getPharmGKB(userRsids),
-    includeFrequency ? db.getGnomAD(userRsids) : Promise.resolve(new Map()),
+    includeFrequency ? db.getGnomAD(userRsids) : Promise.resolve(new Map<string, GnomADFrequency>()),
+    includeGWAS ? db.getGWAS(userRsids) : Promise.resolve(new Map<string, GWASAssociation[]>()),
     db.getVersions()
   ]);
 
@@ -168,19 +176,26 @@ export async function matchGenome(
   let pathogenicCount = 0;
   let drugInteractionCount = 0;
   let carrierCount = 0;
+  let gwasAssociationCount = 0;
 
   for (const [rsid, snp] of genome.snps) {
     const clinvar = clinvarMap.get(rsid);
     const pharmgkb = pharmgkbMap.get(rsid);
     const gnomad = gnomadMap.get(rsid);
+    const gwasAssociations = gwasMap.get(rsid);
+
+    // Filter GWAS associations by p-value threshold
+    const filteredGwas = gwasAssociations?.filter(
+      a => a.pValue <= gwasPValueThreshold
+    );
 
     // Skip if no database matches
-    if (!clinvar && !pharmgkb) continue;
+    if (!clinvar && !pharmgkb && (!filteredGwas || filteredGwas.length === 0)) continue;
 
     const impactScore = calculateImpactScore(clinvar, pharmgkb);
 
-    // Filter by minimum impact
-    if (impactScore < minImpactScore) continue;
+    // Filter by minimum impact (but always include GWAS hits)
+    if (impactScore < minImpactScore && (!filteredGwas || filteredGwas.length === 0)) continue;
 
     const category = categorizeVariant(clinvar, pharmgkb);
 
@@ -188,12 +203,26 @@ export async function matchGenome(
     if (category === 'pathogenic') pathogenicCount++;
     if (category === 'drug') drugInteractionCount++;
     if (category === 'carrier') carrierCount++;
+    if (filteredGwas && filteredGwas.length > 0) gwasAssociationCount += filteredGwas.length;
+
+    // Annotate GWAS associations with user genotype information
+    const annotatedGwas = filteredGwas?.map(association => ({
+      ...association,
+      userGenotype: snp.genotype,
+      hasRiskAllele: association.riskAllele
+        ? snp.genotype.includes(association.riskAllele)
+        : undefined,
+      riskAlleleCopies: association.riskAllele
+        ? countRiskAlleleCopies(snp.genotype, association.riskAllele)
+        : undefined
+    }));
 
     annotatedSNPs.push({
       snp,
       clinvar,
       pharmgkb,
       gnomad,
+      gwas: annotatedGwas,
       impactScore,
       category
     });
@@ -215,11 +244,25 @@ export async function matchGenome(
     pathogenicCount,
     drugInteractionCount,
     carrierCount,
+    gwasAssociationCount,
     annotatedSNPs: limitedResults,
     summary,
     buildVersion: genome.build,
     databaseVersions: versions
   };
+}
+
+/**
+ * Count how many copies of the risk allele are present in a genotype
+ */
+function countRiskAlleleCopies(genotype: string, riskAllele: string): number {
+  let count = 0;
+  for (const char of genotype) {
+    if (char.toUpperCase() === riskAllele.toUpperCase()) {
+      count++;
+    }
+  }
+  return Math.min(count, 2); // Max 2 copies for diploid
 }
 
 /**
@@ -230,6 +273,7 @@ function generateMatchSummary(annotatedSNPs: AnnotatedSNP[]): MatchSummary {
   const moderateImpact: string[] = [];
   const pharmacogenes: string[] = [];
   const carrierStatuses: string[] = [];
+  const gwasTraitCounts = new Map<string, number>();
 
   for (const result of annotatedSNPs) {
     // High impact findings (score >= 4)
@@ -255,13 +299,27 @@ function generateMatchSummary(annotatedSNPs: AnnotatedSNP[]): MatchSummary {
       const condition = result.clinvar.conditions[0]?.name || 'Unknown';
       carrierStatuses.push(`${result.clinvar.gene} (${condition})`);
     }
+
+    // GWAS traits (count occurrences for ranking)
+    if (result.gwas) {
+      for (const association of result.gwas) {
+        const count = gwasTraitCounts.get(association.trait) || 0;
+        gwasTraitCounts.set(association.trait, count + 1);
+      }
+    }
   }
+
+  // Sort GWAS traits by count (most associated variants first)
+  const sortedGwasTraits = [...gwasTraitCounts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .map(([trait]) => trait);
 
   return {
     highImpact: highImpact.slice(0, 10),
     moderateImpact: [...new Set(moderateImpact)].slice(0, 20),
     pharmacogenes: pharmacogenes.slice(0, 20),
-    carrierStatuses: carrierStatuses.slice(0, 10)
+    carrierStatuses: carrierStatuses.slice(0, 10),
+    gwasTraits: sortedGwasTraits.slice(0, 20)
   };
 }
 

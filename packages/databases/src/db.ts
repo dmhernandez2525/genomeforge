@@ -1,12 +1,12 @@
 import Dexie, { type Table } from 'dexie';
-import type { ClinVarRecord, PharmGKBRecord, DatabaseMetadata } from './types';
+import type { ClinVarRecord, PharmGKBRecord, GWASRecord, DatabaseMetadata } from './types';
 import type { ParsedGenome, Report, Conversation, Setting } from '@genomeforge/types';
 
 /**
  * GenomeForge IndexedDB database using Dexie.js
  *
  * This provides the local storage layer for:
- * - Clinical variant databases (ClinVar, PharmGKB)
+ * - Clinical variant databases (ClinVar, PharmGKB, GWAS)
  * - User's parsed genome data
  * - Generated reports and conversations
  * - User settings
@@ -14,6 +14,7 @@ import type { ParsedGenome, Report, Conversation, Setting } from '@genomeforge/t
 export class GenomeForgeDB extends Dexie {
   clinvar!: Table<ClinVarRecord, string>;
   pharmgkb!: Table<PharmGKBRecord, string>;
+  gwas!: Table<GWASRecord, string>;
   genomes!: Table<ParsedGenome, string>;
   reports!: Table<Report, string>;
   conversations!: Table<Conversation, string>;
@@ -29,6 +30,9 @@ export class GenomeForgeDB extends Dexie {
 
       // PharmGKB: indexed by rsid with gene index
       pharmgkb: 'rsid, gene',
+
+      // GWAS Catalog: indexed by rsid with trait and p-value indexes
+      gwas: 'rsid, trait, pValue, chromosome',
 
       // User genomes: indexed by id with secondary indexes
       genomes: 'id, fileName, parsedAt',
