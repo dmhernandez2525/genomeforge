@@ -1,0 +1,71 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "GenomeForge",
+  "version": "0.1.0",
+  "identifier": "com.genomeforge.desktop",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:5174",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "withGlobalTauri": false,
+    "windows": [
+      {
+        "title": "GenomeForge",
+        "width": 1280,
+        "height": 800,
+        "minWidth": 800,
+        "minHeight": 600,
+        "resizable": true,
+        "fullscreen": false,
+        "decorations": true,
+        "transparent": false,
+        "center": true
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "windows": {
+      "certificateThumbprint": null,
+      "digestAlgorithm": "sha256",
+      "timestampUrl": "http://timestamp.digicert.com",
+      "wix": null,
+      "nsis": {
+        "compression": "lzma",
+        "installerIcon": "icons/icon.ico",
+        "installMode": "currentUser",
+        "displayLanguageSelector": false,
+        "languages": ["English"]
+      }
+    },
+    "category": "Medical",
+    "shortDescription": "Privacy-first genetic analysis platform",
+    "longDescription": "GenomeForge is a privacy-first genetic analysis platform that processes your DNA data entirely on your device. Analyze variants from 23andMe, AncestryDNA, or VCF files.",
+    "copyright": "2024 GenomeForge"
+  },
+  "plugins": {
+    "dialog": {},
+    "fs": {
+      "scope": ["$APP/**", "$DOWNLOAD/**", "$HOME/**"]
+    },
+    "notification": {},
+    "shell": {
+      "scope": []
+    },
+    "store": {}
+  }
+}
