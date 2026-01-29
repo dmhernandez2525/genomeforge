@@ -39,7 +39,6 @@ export const common: Translations = {
   export: 'Export',
   import: 'Import',
   download: 'Download',
-  upload: 'Upload',
   refresh: 'Refresh',
   retry: 'Retry',
   loading: 'Loading...',

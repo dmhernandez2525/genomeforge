@@ -6,9 +6,7 @@
 
 import type {
   ChartData,
-  ChartType,
   ChartSeries,
-  ChartOptions,
   ReportData,
   ClinicalFinding,
   DrugResponse,
@@ -184,14 +182,6 @@ export function generateRiskLevelChart(findings: ClinicalFinding[]): ChartData {
     unknown: 'Unknown',
   };
 
-  const riskColors: Record<RiskLevel, string> = {
-    high: colors.danger,
-    moderate: colors.warning,
-    low: colors.info,
-    protective: colors.success,
-    unknown: colors.textLight,
-  };
-
   const riskOrder: RiskLevel[] = ['high', 'moderate', 'low', 'protective', 'unknown'];
   const labels: string[] = [];
   const data: number[] = [];
@@ -243,15 +233,6 @@ export function generateMetabolizerChart(responses: DrugResponse[]): ChartData {
     rapid_metabolizer: 'Rapid',
     ultrarapid_metabolizer: 'Ultrarapid',
     indeterminate: 'Indeterminate',
-  };
-
-  const phenotypeColors: Record<MetabolizerPhenotype, string> = {
-    poor_metabolizer: colors.danger,
-    intermediate_metabolizer: colors.warning,
-    normal_metabolizer: colors.success,
-    rapid_metabolizer: colors.info,
-    ultrarapid_metabolizer: colors.accent,
-    indeterminate: colors.textLight,
   };
 
   const labels: string[] = [];
@@ -417,14 +398,6 @@ export function generateRiskFactorChart(riskFactors: RiskFactor[]): ChartData {
     unknown: 0,
   };
 
-  const riskColors: Record<RiskLevel, string> = {
-    high: colors.danger,
-    moderate: colors.warning,
-    low: colors.info,
-    protective: colors.success,
-    unknown: colors.textLight,
-  };
-
   // Sort by risk level
   const sorted = [...riskFactors].sort(
     (a, b) => riskLevelValues[b.overallRisk] - riskLevelValues[a.overallRisk]
@@ -458,7 +431,7 @@ export function generateRiskFactorChart(riskFactors: RiskFactor[]): ChartData {
 /**
  * Generate genes by chromosome chart
  */
-export function generateChromosomeChart(findings: ClinicalFinding[]): ChartData {
+export function generateChromosomeChart(_findings: ClinicalFinding[]): ChartData {
   const colors = getColorScheme('clinical');
 
   // This would require chromosome info in the findings

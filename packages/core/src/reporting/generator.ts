@@ -16,15 +16,12 @@ import type {
   ReportEventType,
   ReportEventListener,
   ReportColors,
-  ClinicalFinding,
-  DrugResponse,
   TraitAssociation,
-  RiskFactor,
   Recommendation,
   Reference,
 } from './types';
 import { generateReportCharts } from './charts';
-import { getTemplate, getColorScheme } from './templates';
+import { getColorScheme } from './templates';
 
 /**
  * Report Generator class

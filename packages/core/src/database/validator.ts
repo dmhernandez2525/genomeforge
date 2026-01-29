@@ -220,12 +220,10 @@ export function validateRecord(
   for (const field of schema.fields) {
     // Try to find value (case-insensitive)
     let value: string | number | boolean | null | undefined;
-    let foundKey: string | undefined;
 
     for (const key of Object.keys(mappedRecord)) {
       if (key.toLowerCase() === field.name.toLowerCase()) {
         value = mappedRecord[key];
-        foundKey = key;
         break;
       }
     }

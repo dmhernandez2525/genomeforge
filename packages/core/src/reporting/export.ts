@@ -42,7 +42,7 @@ export function exportReport(
  */
 export function exportToHtml(
   report: GeneratedReport,
-  options: Partial<ReportGenerationOptions> = {}
+  _options: Partial<ReportGenerationOptions> = {}
 ): string {
   const colors = report.config.customColors || getColorScheme(report.config.colorScheme);
 
@@ -115,7 +115,7 @@ export function exportToMarkdown(
  */
 export function exportToJson(
   report: GeneratedReport,
-  options: Partial<ReportGenerationOptions> = {}
+  _options: Partial<ReportGenerationOptions> = {}
 ): string {
   const output = {
     id: report.id,

@@ -65,6 +65,7 @@ export type ARIARole =
   | 'button'
   | 'checkbox'
   | 'dialog'
+  | 'grid'
   | 'gridcell'
   | 'link'
   | 'listbox'
@@ -88,6 +89,7 @@ export type ARIARole =
   | 'textbox'
   | 'tooltip'
   | 'tree'
+  | 'treegrid'
   | 'treeitem'
   // Document structure roles
   | 'article'

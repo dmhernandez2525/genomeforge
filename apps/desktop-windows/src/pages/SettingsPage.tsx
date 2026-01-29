@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
-import { Database, Key, Bell, Trash2, Folder, Info, Shield, Download, Upload, ExternalLink } from 'lucide-react';
+import { Database, Key, Trash2, Folder, Info, Shield, Download, Upload, ExternalLink } from 'lucide-react';
 import { useAppStore } from '@/store/app';
 
 export default function SettingsPage() {
