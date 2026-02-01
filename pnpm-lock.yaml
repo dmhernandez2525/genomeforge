@@ -334,8 +334,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/types
       dexie:
-        specifier: ^4.0.10
-        version: 4.2.1
+        specifier: ^4.3.0
+        version: 4.3.0
       react:
         specifier: ^19.0.0
         version: 19.2.4
@@ -443,8 +443,8 @@ importers:
         specifier: workspace:*
         version: link:../types
       dexie:
-        specifier: ^4.0.10
-        version: 4.2.1
+        specifier: ^4.3.0
+        version: 4.3.0
       pako:
         specifier: ^2.1.0
         version: 2.1.0
@@ -3753,8 +3753,8 @@ packages:
     resolution: {integrity: sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==}
     engines: {node: '>=8'}
 
-  dexie@4.2.1:
-    resolution: {integrity: sha512-Ckej0NS6jxQ4Po3OrSQBFddayRhTCic2DoCAG5zacOfOVB9P2Q5Xc5uL/nVa7ZVs+HdMnvUPzLFCB/JwpB6Csg==}
+  dexie@4.3.0:
+    resolution: {integrity: sha512-5EeoQpJvMKHe6zWt/FSIIuRa3CWlZeIl6zKXt+Lz7BU6RoRRLgX9dZEynRfXrkLcldKYCBiz7xekTEylnie1Ug==}
 
   didyoumean@1.2.2:
     resolution: {integrity: sha512-gxtyfqMg7GKyhQmb056K7M3xszy/myH8w+B4RT+QXBQsvAOdc3XymqDDPHx1BgPgsdAA5SIifona89YtRATDzw==}
@@ -10750,7 +10750,7 @@ snapshots:
   detect-libc@2.1.2:
     optional: true
 
-  dexie@4.2.1: {}
+  dexie@4.3.0: {}
 
   didyoumean@1.2.2: {}
 
