@@ -1,8 +1,16 @@
 import { Link } from 'react-router-dom';
+import DemoRoleSelector from '../components/DemoRoleSelector';
+import { useDemoContext } from '../contexts/DemoContext';
 import { useGenomeStore } from '../store/genome';
 
 export default function HomePage() {
   const genome = useGenomeStore((state) => state.genome);
+  const { isDemoMode, isDemoActive } = useDemoContext();
+
+  // Show demo role selector if demo mode is enabled but not yet activated
+  if (isDemoMode && !isDemoActive) {
+    return <DemoRoleSelector />;
+  }
 
   return (
     <div className="text-center">
