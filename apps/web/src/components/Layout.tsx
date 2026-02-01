@@ -1,4 +1,5 @@
 import { Link, Outlet, useLocation } from 'react-router-dom';
+import DemoModeBanner from './DemoModeBanner';
 
 const navigation = [
   { name: 'Home', href: '/' },
@@ -15,6 +16,9 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Demo Mode Banner */}
+      <DemoModeBanner />
+
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
