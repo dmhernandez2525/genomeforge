@@ -1,4 +1,5 @@
 import { Link, Outlet, useLocation } from 'react-router-dom';
+import { useDemoContext } from '../contexts/DemoContext';
 import DemoModeBanner from './DemoModeBanner';
 
 const navigation = [
@@ -13,6 +14,10 @@ const navigation = [
 
 export default function Layout() {
   const location = useLocation();
+  const { isDemoMode, isDemoActive } = useDemoContext();
+
+  // Only show full navigation when user is "logged in" (demo active or production mode)
+  const showFullNav = !isDemoMode || isDemoActive;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -26,21 +31,58 @@ export default function Layout() {
             <Link to="/" className="text-xl font-bold text-primary-600">
               GenomeForge
             </Link>
-            <nav className="hidden md:flex items-center gap-6">
-              {navigation.map((item) => (
+
+            {showFullNav ? (
+              <nav className="hidden md:flex items-center gap-6">
+                {navigation.map((item) => (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    className={`text-sm font-medium ${
+                      location.pathname === item.href
+                        ? 'text-primary-600'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    {item.name}
+                  </Link>
+                ))}
+              </nav>
+            ) : (
+              /* Limited navigation for non-logged-in users */
+              <nav className="hidden md:flex items-center gap-6">
                 <Link
-                  key={item.name}
-                  to={item.href}
+                  to="/"
                   className={`text-sm font-medium ${
-                    location.pathname === item.href
+                    location.pathname === '/'
                       ? 'text-primary-600'
                       : 'text-gray-600 hover:text-gray-900'
                   }`}
                 >
-                  {item.name}
+                  Home
                 </Link>
-              ))}
-            </nav>
+              </nav>
+            )}
+
+            {/* Auth Buttons */}
+            <div className="flex items-center gap-4">
+              {isDemoMode && !isDemoActive && (
+                <>
+                  <Link
+                    to="/sign-in"
+                    className="text-sm font-medium text-gray-600 hover:text-gray-900"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    to="/sign-in"
+                    className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700"
+                  >
+                    Get Started
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </header>

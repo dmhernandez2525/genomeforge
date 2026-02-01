@@ -5,14 +5,18 @@
  * Displays available demo users with their descriptions.
  */
 
+import { useNavigate } from 'react-router-dom';
 import { useDemoContext } from '../contexts/DemoContext';
 import type { DemoRole } from '../lib/demo-data';
 
 export default function DemoRoleSelector() {
   const { demoUsers, activateDemo } = useDemoContext();
+  const navigate = useNavigate();
 
   const handleSelectRole = (role: DemoRole) => {
     activateDemo(role);
+    // Navigate to analysis page after selecting a role
+    navigate('/analysis');
   };
 
   return (

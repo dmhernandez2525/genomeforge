@@ -5,14 +5,21 @@
  * showing the current demo user and providing an option to exit demo mode.
  */
 
+import { useNavigate } from 'react-router-dom';
 import { useDemoContext } from '../contexts/DemoContext';
 
 export default function DemoModeBanner() {
   const { isDemoActive, currentDemoUser, deactivateDemo } = useDemoContext();
+  const navigate = useNavigate();
 
   if (!isDemoActive || !currentDemoUser) {
     return null;
   }
+
+  const handleExitDemo = () => {
+    deactivateDemo();
+    navigate('/');
+  };
 
   return (
     <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
@@ -45,7 +52,7 @@ export default function DemoModeBanner() {
           </div>
           <button
             type="button"
-            onClick={deactivateDemo}
+            onClick={handleExitDemo}
             className="inline-flex items-center gap-1.5 rounded-md bg-white/10 px-3 py-1 text-sm font-medium hover:bg-white/20 transition-colors"
           >
             <svg
