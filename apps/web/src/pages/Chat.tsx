@@ -151,11 +151,11 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-12rem)]">
-      <div className="flex items-center justify-between mb-4">
+    <div className="flex flex-col h-[calc(100vh-16rem)] sm:h-[calc(100vh-12rem)]">
+      <div className="flex flex-col gap-2 mb-3 sm:flex-row sm:items-center sm:justify-between sm:mb-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Chat with AI</h1>
-          <p className="text-sm text-gray-600">
+          <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">Chat with AI</h1>
+          <p className="text-xs text-gray-600 sm:text-sm">
             Ask questions about your genetic findings. Using{' '}
             <span className="font-medium text-primary-600">{aiProvider}</span>
             {matchResult && <span className="text-green-600 ml-2">(genetic context loaded)</span>}
@@ -254,19 +254,19 @@ export default function ChatPage() {
           }}
           placeholder="Ask about your genetic findings..."
           disabled={isLoading}
-          className="flex-1 rounded-lg border border-gray-300 px-4 py-3 focus:border-primary-500 focus:outline-none disabled:bg-gray-50"
+          className="flex-1 min-w-0 rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-primary-500 focus:outline-none disabled:bg-gray-50 sm:px-4 sm:py-3 sm:text-base"
         />
         <button
           onClick={sendMessage}
           disabled={isLoading || !message.trim()}
-          className="rounded-lg bg-primary-600 px-6 py-3 text-white font-medium hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="shrink-0 rounded-lg bg-primary-600 px-4 py-2.5 text-sm text-white font-medium hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed sm:px-6 sm:py-3 sm:text-base"
         >
-          {isLoading ? 'Sending...' : 'Send'}
+          {isLoading ? '...' : 'Send'}
         </button>
       </div>
 
       {/* Privacy Notice */}
-      <p className="mt-4 text-xs text-gray-500 text-center">
+      <p className="mt-2 text-[10px] text-gray-500 text-center sm:mt-4 sm:text-xs">
         Only summarized findings are sent to the AI provider. Raw genetic data (rsIDs, genotypes)
         never leave your device. Your conversation is not stored.
       </p>
@@ -280,7 +280,7 @@ function MessageBubble({ message }: { message: Message }) {
   return (
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
       <div
-        className={`max-w-[80%] rounded-lg px-4 py-3 ${
+        className={`max-w-[85%] sm:max-w-[80%] rounded-lg px-3 py-2.5 sm:px-4 sm:py-3 ${
           isUser ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-900'
         }`}
       >

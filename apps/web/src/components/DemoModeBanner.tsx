@@ -24,8 +24,8 @@ export default function DemoModeBanner() {
   return (
     <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between py-2">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between py-2 gap-2">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-2.5 py-0.5 text-xs font-semibold">
               <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                 <path

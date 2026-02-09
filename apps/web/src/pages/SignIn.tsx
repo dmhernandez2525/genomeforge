@@ -33,9 +33,9 @@ export default function SignInPage() {
 
   // Production mode: show sign in options (placeholder)
   return (
-    <div className="min-h-[70vh] flex flex-col items-center justify-center">
+    <div className="min-h-[60vh] sm:min-h-[70vh] flex flex-col items-center justify-center px-2">
       <div className="w-full max-w-md">
-        <h1 className="text-3xl font-bold text-center text-gray-900 mb-8">
+        <h1 className="text-2xl font-bold text-center text-gray-900 mb-6 sm:text-3xl sm:mb-8">
           Sign In to GenomeForge
         </h1>
         <div className="bg-white rounded-xl border border-gray-200 p-8 shadow-sm">

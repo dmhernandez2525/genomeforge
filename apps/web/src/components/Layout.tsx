@@ -1,5 +1,6 @@
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useDemoContext } from '../contexts/DemoContext';
+import BottomNav from './BottomNav';
 import DemoModeBanner from './DemoModeBanner';
 
 const navigation = [
@@ -88,17 +89,20 @@ export default function Layout() {
       </header>
 
       {/* Main Content */}
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         <Outlet />
       </main>
 
-      {/* Footer */}
-      <footer className="bg-white border-t border-gray-200 py-8">
+      {/* Footer - hidden on mobile where BottomNav is shown */}
+      <footer className="hidden md:block bg-white border-t border-gray-200 py-8">
         <div className="mx-auto max-w-7xl px-4 text-center text-sm text-gray-500">
           <p>Your DNA data never leaves your device.</p>
           <p className="mt-2">GenomeForge - Privacy-first genetic analysis</p>
         </div>
       </footer>
+
+      {/* Mobile Bottom Navigation */}
+      <BottomNav />
     </div>
   );
 }
