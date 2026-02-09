@@ -79,14 +79,14 @@ export default function UploadPage() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h1 className="text-3xl font-bold text-gray-900">Upload Your Genome</h1>
-      <p className="mt-2 text-gray-600">
+      <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">Upload Your Genome</h1>
+      <p className="mt-1 text-sm text-gray-600 sm:mt-2 sm:text-base">
         Your file is processed 100% locally in your browser. Nothing is uploaded to any server.
       </p>
 
       {/* Drop Zone */}
       <div
-        className={`mt-8 border-2 border-dashed rounded-xl p-12 text-center transition-colors ${
+        className={`mt-6 sm:mt-8 border-2 border-dashed rounded-xl p-6 sm:p-12 text-center transition-colors ${
           isDragging ? 'border-primary-500 bg-primary-50' : 'border-gray-300 hover:border-gray-400'
         }`}
         onDragOver={(e) => {

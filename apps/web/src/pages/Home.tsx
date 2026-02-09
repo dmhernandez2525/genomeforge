@@ -41,10 +41,10 @@ export default function HomePage() {
         Your DNA never leaves your device
       </div>
 
-      <h1 className="text-4xl font-bold text-gray-900 sm:text-5xl">
+      <h1 className="text-3xl font-bold text-gray-900 sm:text-4xl md:text-5xl">
         Your genes, your keys, your insights.
       </h1>
-      <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
+      <p className="mt-3 text-base text-gray-600 max-w-2xl mx-auto sm:mt-4 sm:text-lg">
         GenomeForge analyzes your DNA data 100% locally. Your genetic information never leaves your
         device. Get clinical-grade insights with complete privacy.
       </p>
@@ -91,7 +91,7 @@ export default function HomePage() {
       </p>
 
       {/* Features */}
-      <div className="mt-16 grid gap-8 md:grid-cols-3">
+      <div className="mt-10 grid gap-4 sm:mt-16 sm:gap-8 md:grid-cols-3">
         <div className="rounded-xl border border-gray-200 p-6">
           <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-primary-100 text-primary-600 mx-auto mb-4">
             <svg
@@ -161,9 +161,9 @@ export default function HomePage() {
       </div>
 
       {/* What You Get Section */}
-      <div className="mt-16">
-        <h2 className="text-2xl font-bold text-gray-900 mb-8">Comprehensive Analysis</h2>
-        <div className="grid gap-4 md:grid-cols-4">
+      <div className="mt-10 sm:mt-16">
+        <h2 className="text-xl font-bold text-gray-900 mb-4 sm:text-2xl sm:mb-8">Comprehensive Analysis</h2>
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
           <div className="rounded-lg bg-gray-50 p-4">
             <div className="text-2xl mb-2">
               <svg
@@ -248,7 +248,7 @@ export default function HomePage() {
       </div>
 
       {/* Medical Disclaimer */}
-      <div className="mt-16 rounded-lg border border-yellow-200 bg-yellow-50 p-6 text-left">
+      <div className="mt-10 sm:mt-16 rounded-lg border border-yellow-200 bg-yellow-50 p-4 sm:p-6 text-left">
         <div className="flex">
           <div className="flex-shrink-0">
             <svg

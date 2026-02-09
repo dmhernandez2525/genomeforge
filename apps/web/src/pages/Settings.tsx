@@ -112,8 +112,8 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
-      <p className="mt-2 text-gray-600">Configure your AI provider and API keys.</p>
+      <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">Settings</h1>
+      <p className="mt-1 text-sm text-gray-600 sm:mt-2 sm:text-base">Configure your AI provider and API keys.</p>
 
       {/* AI Provider Selection */}
       <div className="mt-8">
@@ -192,27 +192,29 @@ export default function SettingsPage() {
             </div>
           ) : (
             <div className="mt-4">
-              <div className="flex gap-2">
+              <div className="flex flex-col gap-2 sm:flex-row">
                 <input
                   type={showKey ? 'text' : 'password'}
                   value={apiKeyInput}
                   onChange={(e) => setApiKeyInput(e.target.value)}
                   placeholder={`Enter your ${selectedProvider.name} API key`}
-                  className="flex-1 rounded-lg border border-gray-300 px-4 py-2 focus:border-primary-500 focus:outline-none"
+                  className="flex-1 min-w-0 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none sm:px-4 sm:text-base"
                 />
-                <button
-                  onClick={() => setShowKey(!showKey)}
-                  className="rounded-lg border border-gray-300 px-4 py-2 text-gray-600 hover:bg-gray-50"
-                >
-                  {showKey ? 'Hide' : 'Show'}
-                </button>
-                <button
-                  onClick={validateAndSaveKey}
-                  disabled={!apiKeyInput || validating}
-                  className="rounded-lg bg-primary-600 px-6 py-2 text-white font-medium hover:bg-primary-700 disabled:opacity-50"
-                >
-                  {validating ? 'Validating...' : 'Save'}
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setShowKey(!showKey)}
+                    className="flex-1 sm:flex-none rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50"
+                  >
+                    {showKey ? 'Hide' : 'Show'}
+                  </button>
+                  <button
+                    onClick={validateAndSaveKey}
+                    disabled={!apiKeyInput || validating}
+                    className="flex-1 sm:flex-none rounded-lg bg-primary-600 px-6 py-2 text-sm text-white font-medium hover:bg-primary-700 disabled:opacity-50"
+                  >
+                    {validating ? 'Validating...' : 'Save'}
+                  </button>
+                </div>
               </div>
 
               {validationError && (

@@ -163,8 +163,8 @@ export default function ReportsPage() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-gray-900">Reports</h1>
-      <p className="mt-2 text-gray-600">
+      <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">Reports</h1>
+      <p className="mt-1 text-sm text-gray-600 sm:mt-2 sm:text-base">
         Generate detailed reports based on your genetic analysis.
       </p>
 
@@ -176,7 +176,7 @@ export default function ReportsPage() {
       )}
 
       {/* Report Types */}
-      <div className="mt-8 grid gap-4 md:grid-cols-2">
+      <div className="mt-6 grid gap-3 sm:mt-8 sm:gap-4 md:grid-cols-2">
         {reportTypes.map((report) => (
           <button
             key={report.id}
@@ -203,8 +203,8 @@ export default function ReportsPage() {
       {/* Generated Report Preview */}
       {generatedReport && (
         <div className="mt-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Generated Report</h2>
+          <div className="flex flex-col gap-2 mb-4 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="text-lg font-semibold text-gray-900 sm:text-xl">Generated Report</h2>
             <div className="flex gap-2">
               <button
                 onClick={downloadReport}
@@ -222,7 +222,7 @@ export default function ReportsPage() {
           </div>
 
           {/* Report Info */}
-          <div className="mb-4 flex items-center gap-4 text-sm text-gray-500">
+          <div className="mb-4 flex flex-col gap-1 text-sm text-gray-500 sm:flex-row sm:items-center sm:gap-4">
             <span>
               Type:{' '}
               <strong className="text-gray-700">
@@ -242,7 +242,7 @@ export default function ReportsPage() {
           </div>
 
           {/* Report Preview */}
-          <div className="rounded-lg border border-gray-200 bg-white p-6 max-h-[600px] overflow-y-auto">
+          <div className="rounded-lg border border-gray-200 bg-white p-4 sm:p-6 max-h-[60vh] sm:max-h-[600px] overflow-y-auto">
             <h1 className="text-xl font-bold text-gray-900 mb-2">{generatedReport.title}</h1>
             {generatedReport.summary && (
               <p className="text-gray-600 mb-6">{generatedReport.summary}</p>
@@ -273,7 +273,7 @@ export default function ReportsPage() {
       )}
 
       {/* Disclaimer */}
-      <div className="mt-8 rounded-lg border border-yellow-200 bg-yellow-50 p-6">
+      <div className="mt-6 sm:mt-8 rounded-lg border border-yellow-200 bg-yellow-50 p-4 sm:p-6">
         <h3 className="font-semibold text-yellow-800">Important Notice</h3>
         <p className="mt-2 text-sm text-yellow-700">
           These reports are for informational purposes only and should not be used for medical

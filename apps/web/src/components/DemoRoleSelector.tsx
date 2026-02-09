@@ -39,14 +39,14 @@ export default function DemoRoleSelector() {
           </svg>
           Demo Mode
         </div>
-        <h1 className="text-3xl font-bold text-gray-900 sm:text-4xl">Experience GenomeForge</h1>
-        <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
+        <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl md:text-4xl">Experience GenomeForge</h1>
+        <p className="mt-3 text-base text-gray-600 max-w-2xl mx-auto sm:mt-4 sm:text-lg">
           Select a demo profile to explore the platform with pre-loaded genetic data. No account or
           personal data required.
         </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 max-w-3xl w-full">
+      <div className="grid gap-4 w-full max-w-3xl sm:gap-6 md:grid-cols-2">
         {demoUsers.map((user) => (
           <button
             type="button"

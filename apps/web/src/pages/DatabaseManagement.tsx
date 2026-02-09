@@ -315,25 +315,25 @@ export default function DatabaseManagementPage() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Database Management</h1>
-          <p className="mt-2 text-gray-600">
+          <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">Database Management</h1>
+          <p className="mt-1 text-sm text-gray-600 sm:mt-2 sm:text-base">
             Load and manage reference databases for genetic analysis.
           </p>
         </div>
         <button
           onClick={handleClearAll}
-          className="rounded-lg border border-red-300 px-4 py-2 text-sm text-red-700 hover:bg-red-50"
+          className="w-full sm:w-auto shrink-0 rounded-lg border border-red-300 px-4 py-2 text-sm text-red-700 hover:bg-red-50"
         >
           Clear All Databases
         </button>
       </div>
 
       {/* Overall Status */}
-      <div className="mt-6 rounded-lg border border-gray-200 bg-white p-6">
+      <div className="mt-4 rounded-lg border border-gray-200 bg-white p-4 sm:mt-6 sm:p-6">
         <h2 className="font-semibold text-gray-900">Database Status Overview</h2>
-        <div className="mt-4 grid gap-4 md:grid-cols-3">
+        <div className="mt-3 grid gap-3 sm:mt-4 sm:gap-4 md:grid-cols-3">
           {databases.map((db) => (
             <div
               key={db.id}
@@ -380,7 +380,7 @@ export default function DatabaseManagementPage() {
       </div>
 
       {/* Instructions */}
-      <div className="mt-8 rounded-lg border border-blue-200 bg-blue-50 p-6">
+      <div className="mt-6 rounded-lg border border-blue-200 bg-blue-50 p-4 sm:mt-8 sm:p-6">
         <h3 className="font-semibold text-blue-800">How to Load Databases</h3>
         <ol className="mt-3 list-decimal list-inside space-y-2 text-sm text-blue-700">
           <li>Obtain a pre-processed database bundle URL (gzipped JSON format)</li>
@@ -395,7 +395,7 @@ export default function DatabaseManagementPage() {
       </div>
 
       {/* Privacy Notice */}
-      <div className="mt-6 rounded-lg border border-green-200 bg-green-50 p-6">
+      <div className="mt-4 rounded-lg border border-green-200 bg-green-50 p-4 sm:mt-6 sm:p-6">
         <h3 className="font-semibold text-green-800">Privacy & Storage</h3>
         <ul className="mt-2 space-y-1 text-sm text-green-700">
           <li className="flex items-start gap-2">
@@ -459,7 +459,7 @@ function DatabaseCard({
       </div>
 
       {/* Content */}
-      <div className="px-6 py-4">
+      <div className="px-4 py-3 sm:px-6 sm:py-4">
         {/* Loading Progress */}
         {loadingState.isLoading && (
           <div className="mb-4">
@@ -515,7 +515,7 @@ function DatabaseCard({
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           {loadingState.isLoading ? (
             <button
               onClick={onCancel}

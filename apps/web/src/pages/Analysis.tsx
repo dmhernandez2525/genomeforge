@@ -210,10 +210,10 @@ export default function AnalysisPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Genome Analysis</h1>
-          <p className="mt-1 text-gray-600">
+          <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">Genome Analysis</h1>
+          <p className="mt-1 text-sm text-gray-600 sm:text-base">
             {genome.snpCount.toLocaleString()} variants from {genome.format} format
           </p>
         </div>
@@ -221,7 +221,7 @@ export default function AnalysisPage() {
           <button
             onClick={runAnalysis}
             disabled={isAnalyzing}
-            className="rounded-lg bg-primary-600 px-6 py-3 text-white font-medium hover:bg-primary-700 disabled:opacity-50"
+            className="w-full sm:w-auto rounded-lg bg-primary-600 px-6 py-3 text-white font-medium hover:bg-primary-700 disabled:opacity-50"
           >
             {isAnalyzing ? 'Analyzing...' : 'Run Analysis'}
           </button>
@@ -252,7 +252,7 @@ export default function AnalysisPage() {
       )}
 
       {/* Database Status */}
-      <div className="mt-6 grid gap-4 md:grid-cols-3">
+      <div className="mt-4 grid gap-3 grid-cols-1 sm:mt-6 sm:gap-4 sm:grid-cols-3">
         <DatabaseStatusCard
           name="ClinVar"
           status={databaseStatus.clinvar}
@@ -274,13 +274,13 @@ export default function AnalysisPage() {
       {matchResult && (
         <>
           {/* Tabs */}
-          <div className="mt-8 border-b border-gray-200">
-            <nav className="-mb-px flex space-x-8">
+          <div className="mt-6 -mx-4 px-4 sm:mx-0 sm:px-0 border-b border-gray-200 overflow-x-auto">
+            <nav className="-mb-px flex space-x-4 sm:space-x-8 min-w-max">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
                     activeTab === tab.id
                       ? 'border-primary-500 text-primary-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -307,7 +307,7 @@ export default function AnalysisPage() {
 
       {/* Quick Links */}
       {matchResult && (
-        <div className="mt-8 grid gap-4 md:grid-cols-2">
+        <div className="mt-6 grid gap-3 sm:mt-8 sm:gap-4 md:grid-cols-2">
           <Link
             to="/reports"
             className="rounded-lg border border-gray-200 bg-white p-6 hover:border-primary-300 transition-colors"
@@ -376,7 +376,7 @@ function OverviewTab({
   return (
     <div className="space-y-6">
       {/* Summary Stats */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
         <StatCard
           label="Total Variants"
           value={result.totalSNPs.toLocaleString()}
@@ -415,9 +415,9 @@ function OverviewTab({
                       : 'bg-blue-50 border-blue-200'
                 }`}
               >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <span className="font-medium text-gray-900">{assessment.condition}</span>
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0">
+                    <span className="font-medium text-gray-900 break-words">{assessment.condition}</span>
                     <p className="text-sm text-gray-600 mt-1">Gene: {assessment.gene}</p>
                   </div>
                   <span
@@ -522,7 +522,7 @@ function PharmGKBTab({
             <div className="border-b border-gray-200 px-6 py-4">
               <h3 className="font-semibold text-gray-900">Metabolizer Phenotypes</h3>
             </div>
-            <div className="grid gap-4 p-6 md:grid-cols-2">
+            <div className="grid gap-3 p-4 sm:gap-4 sm:p-6 md:grid-cols-2">
               {enhanced.metabolizerPhenotypes.map((phenotype, i) => (
                 <div key={i} className="rounded-lg border border-gray-100 bg-gray-50 p-4">
                   <div className="flex items-center justify-between">
@@ -588,12 +588,12 @@ function GWASTab({ associations }: { associations: TraitAssociation[] }) {
         {sortedAssociations.length > 0 ? (
           <div className="divide-y divide-gray-200">
             {sortedAssociations.slice(0, 30).map((trait, i) => (
-              <div key={i} className="px-6 py-4">
-                <div className="flex items-center justify-between">
-                  <span className="font-medium text-gray-900">{trait.trait}</span>
+              <div key={i} className="px-4 py-3 sm:px-6 sm:py-4">
+                <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                  <span className="font-medium text-gray-900 break-words">{trait.trait}</span>
                   <span className="text-sm text-gray-500 capitalize">{trait.category}</span>
                 </div>
-                <div className="mt-2 flex items-center gap-4 text-sm">
+                <div className="mt-2 flex flex-wrap items-center gap-2 sm:gap-4 text-sm">
                   <span className="text-gray-600">
                     Score: <strong>{(trait.riskScore * 100).toFixed(0)}%</strong>
                   </span>
@@ -639,9 +639,9 @@ function PRSTab({ scores }: { scores: PolygenicRiskScore[] }) {
         {sortedScores.length > 0 ? (
           <div className="divide-y divide-gray-200">
             {sortedScores.slice(0, 20).map((score, i) => (
-              <div key={i} className="px-6 py-4">
-                <div className="flex items-center justify-between">
-                  <span className="font-medium text-gray-900">{score.trait}</span>
+              <div key={i} className="px-4 py-3 sm:px-6 sm:py-4">
+                <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                  <span className="font-medium text-gray-900 break-words">{score.trait}</span>
                   <RiskBadge level={score.riskCategory.replace(/_/g, ' ')} />
                 </div>
                 <div className="mt-3">
@@ -680,9 +680,9 @@ function PRSTab({ scores }: { scores: PolygenicRiskScore[] }) {
 
 function VariantRow({ variant }: { variant: AnnotatedSNP }) {
   return (
-    <div className="px-6 py-4">
-      <div className="flex items-center justify-between">
-        <div>
+    <div className="px-4 py-3 sm:px-6 sm:py-4">
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
           <span className="font-medium text-gray-900">{variant.snp.rsid}</span>
           {variant.clinvar?.gene && (
             <span className="ml-2 text-sm text-gray-500">({variant.clinvar.gene})</span>
@@ -693,7 +693,7 @@ function VariantRow({ variant }: { variant: AnnotatedSNP }) {
         )}
       </div>
       {variant.clinvar?.conditions && variant.clinvar.conditions.length > 0 && (
-        <p className="text-sm text-gray-600 mt-1">
+        <p className="text-sm text-gray-600 mt-1 break-words">
           {variant.clinvar.conditions.map((c) => c.name).join(', ')}
         </p>
       )}
@@ -722,9 +722,9 @@ function StatCard({
   };
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-6">
-      <div className={`text-2xl font-bold ${colorClasses[color]}`}>{value}</div>
-      <div className="text-sm text-gray-500">{label}</div>
+    <div className="rounded-lg border border-gray-200 bg-white p-4 sm:p-6">
+      <div className={`text-xl sm:text-2xl font-bold ${colorClasses[color]}`}>{value}</div>
+      <div className="text-xs sm:text-sm text-gray-500">{label}</div>
     </div>
   );
 }
