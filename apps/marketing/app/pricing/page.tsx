@@ -52,12 +52,12 @@ export default function Pricing() {
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-8 md:grid-cols-2">
             {/* BYOK Plan */}
-            <div className="rounded-2xl border border-gray-200 p-8">
+            <div className="rounded-2xl border border-gray-200 p-6 sm:p-8">
               <div className="mb-4">
                 <span className="text-sm font-medium text-gray-500">BYOK</span>
               </div>
               <div className="mb-6">
-                <span className="text-5xl font-bold text-gray-900">$29</span>
+                <span className="text-4xl sm:text-5xl font-bold text-gray-900">$29</span>
                 <span className="text-gray-500"> one-time</span>
               </div>
               <p className="mb-8 text-gray-600">
@@ -173,7 +173,7 @@ export default function Pricing() {
             </div>
 
             {/* Pro Plan */}
-            <div className="relative rounded-2xl border-2 border-primary-600 p-8">
+            <div className="relative rounded-2xl border-2 border-primary-600 p-6 sm:p-8">
               <div className="absolute -top-3 right-8 rounded-full bg-primary-600 px-3 py-1 text-xs font-medium text-white">
                 Most Popular
               </div>
@@ -181,7 +181,7 @@ export default function Pricing() {
                 <span className="text-sm font-medium text-primary-600">Pro</span>
               </div>
               <div className="mb-6">
-                <span className="text-5xl font-bold text-gray-900">$49</span>
+                <span className="text-4xl sm:text-5xl font-bold text-gray-900">$49</span>
                 <span className="text-gray-500"> one-time</span>
               </div>
               <p className="mb-8 text-gray-600">

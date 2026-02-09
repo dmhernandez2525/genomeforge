@@ -39,7 +39,7 @@ export default function Download() {
             Choose your platform. All versions include 100% local processing.
           </p>
 
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {/* Web App */}
             <div className="rounded-xl border-2 border-primary-600 p-6">
               <div className="mb-4 text-4xl">🌐</div>

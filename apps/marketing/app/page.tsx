@@ -77,21 +77,21 @@ export default function Home() {
       {/* Trust Badges */}
       <section className="border-y border-gray-100 bg-gray-50 py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 sm:gap-8 md:grid-cols-4">
             <div className="text-center">
-              <div className="text-3xl font-bold text-primary-600">100%</div>
+              <div className="text-2xl sm:text-3xl font-bold text-primary-600">100%</div>
               <div className="text-sm text-gray-600">Local Processing</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-primary-600">0</div>
+              <div className="text-2xl sm:text-3xl font-bold text-primary-600">0</div>
               <div className="text-sm text-gray-600">Data Uploads</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-primary-600">341K+</div>
+              <div className="text-2xl sm:text-3xl font-bold text-primary-600">341K+</div>
               <div className="text-sm text-gray-600">Clinical Variants</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-primary-600">$29</div>
+              <div className="text-2xl sm:text-3xl font-bold text-primary-600">$29</div>
               <div className="text-sm text-gray-600">One-Time Price</div>
             </div>
           </div>
